@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOVEX JARVIS</title>
+<style>
+:root {
+  --cyan: #00e5ff;
+  --blue: #168bff;
+  --bg: #030912;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh;
+  background: radial-gradient(ellipse at top, #09264b, var(--bg) 65%);
+  color: #e8faff;
+  font-family: Arial, sans-serif;
+}
+header {
+  padding: 20px; text-align: center;
+  border-bottom: 1px solid #124b70;
+  letter-spacing: 3px;
+}
+header strong { color: var(--cyan); font-size: 23px; }
+.status { color: #83a9c6; font-size: 12px; margin-top: 8px; }
+main {
+  max-width: 600px; margin: auto;
+  padding: 18px; text-align: center;
+}
+.orb {
+  width: 190px; height: 190px; margin: 28px auto 16px;
+  border-radius: 50%;
+  border: 2px solid var(--cyan);
+  display: grid; place-items: center;
+  background: radial-gradient(circle, #0876a9, #031326 65%);
+  box-shadow: 0 0 20px #00cfff, inset 0 0 30px #0077ff;
+  animation: glow 3s infinite alternate;
+}
+.orb span { font-size: 66px; color: white; text-shadow: 0 0 24px var(--cyan); }
+@keyframes glow {
+  from { box-shadow: 0 0 12px #00cfff, inset 0 0 20px #0077ff; }
+  to { box-shadow: 0 0 35px #00cfff, inset 0 0 40px #0077ff; }
+}
+h2 { font-weight: 500; }
+#status { color: var(--cyan); min-height: 24px; }
+.panel {
+  background: #071726dd; border: 1px solid #145074;
+  border-radius: 14px; padding: 14px; margin-top: 16px;
+  text-align: left;
+}
+#chat { height: 210px; overflow-y: auto; }
+.msg { padding: 10px; margin: 8px 0; border-radius: 10px; line-height: 1.45; overflow-wrap: anywhere; }
+.user { background: #10365a; }
+.bot { background: #092b36; border: 1px solid #07576b; }
+.controls { display: flex; gap: 8px; margin-top: 12px; }
+input, select {
+  background: #06111f; color: white; border: 1px solid #17658a;
+  border-radius: 10px; padding: 12px; min-width: 0;
+}
+input { flex: 1; width: 50%; }
+button {
+  background: linear-gradient(135deg, #087fc5, #04c9e8);
+  color: #00111c; border: 0; border-radius: 10px;
+  padding: 12px; font-weight: bold; cursor: pointer;
+}
+button:disabled { opacity: .5; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.actions button { flex: 1; }
+small { color: #8aaabe; line-height: 1.5; }
+</style>
+</head>
+<body>
+<header>
+  <strong>NOVEX JARVIS</strong>
+  <div class="status">PERSONAL AI • BLUE/CYAN SYSTEM</div>
+</header>
+
+<main>
+  <div class="orb" id="orb"><span>N</span></div>
+  <h2>Your AI Assistant</h2>
+  <div id="status" role="status">System Ready</div>
+
+  <div class="panel">
+    <label for="lang">Voice language</label><br><br>
+    <select id="lang">
+      <option value="hi-IN">Hindi</option>
+      <option value="en-IN">English (India)</option>
+      <option value="en-US">English (US)</option>
+    </select>
+    <div id="chat" aria-live="polite">
+      <div class="msg bot">Hello! Main NOVEX JARVIS hoon. Bolo, main kaise madad karun?</div>
+    </div>
+    <div class="controls">
+      <input id="message" placeholder="Type your message..." maxlength="2000">
+      <button id="send">Send</button>
+    </div>
+    <div class="actions">
+      <button id="mic">🎙 Speak</button>
+      <button id="stop">■ Stop Voice</button>
+      <button id="clear">Clear Chat</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <strong>System Features</strong><br><br>
+    <small>
+      ✓ Iron Man inspired interface<br>
+      ✓ Hindi and English speech input (supported browsers)<br>
+      ✓ Spoken responses<br>
+      ✓ AI service connection point<br>
+      ✓ Android and desktop browser prototype
+    </small>
+  </div>
+  <p><small>Prototype v0.1 • AI service not connected yet</small></p>
+</main>
+
+<script>
+// Keep empty until a secure AI backend is configured.
+// Never put a private AI API key in this HTML file.
+const AI_ENDPOINT = "";
+
+const $ = id => document.getElementById(id);
+const chat = $("chat");
+const statusBox = $("status");
+let busy = false;
+
+function setStatus(text) {
+  statusBox.textContent = text;
+}
+
+function addMessage(text, who) {
+  const div = document.createElement("div");
+  div.className = "msg " + who;
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function speak(text) {
+  if (!("speechSynthesis" in window)) {
+    setStatus("Speech output not supported in this browser.");
+    return;
+  }
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = $("lang").value;
+  utterance.rate = 1;
+  speechSynthesis.speak(utterance);
+}
+
+async function askJarvis(message) {
+  if (busy) return;
+  busy = true;
+  $("send").disabled = true;
+  setStatus("Processing...");
+
+  try {
+    if (!AI_ENDPOINT) {
+      const reply =
+        "Abhi mera AI connect nahi hua hai. AI enable karne ke liye " +
+        "secure backend setup karna hoga. Filhaal mera voice interface ready hai.";
+      addMessage(reply, "bot");
+      setStatus("Demo mode — AI not connected");
+      speak(reply);
+      return;
+    }
+    }
+
+    const response = await fetch(AI_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: message,
+        language: $("lang").value
+      })
+    });
+
+    if (!response.ok) throw new Error("AI service error");
+    const data = await response.json();
+    if (typeof data.reply !== "string") {
+      throw new Error("Invalid server response");
+    }
+
+    addMessage(data.reply, "bot");
+    setStatus("Response ready");
+    speak(data.reply);
+  } catch (error) {
+    addMessage("AI service connect nahi ho payi. Backend aur internet check karo.", "bot");
+    setStatus("Connection error");
+  } finally {
+    busy = false;
+    $("send").disabled = false;
+  }
+}
+
+$("send").addEventListener("click", () => {
+  const message = $("message").value.trim();
+  if (!message) return;
+  addMessage(message, "user");
+  $("message").value = "";
+  askJarvis(message);
+});
+
+$("message").addEventListener("keydown", event => {
+  if (event.key === "Enter") $("send").click();
+});
+
+$("stop").addEventListener("click", () => {
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  if (recognition) recognition.stop();
+  setStatus("Voice stopped");
+});
+
+$("clear").addEventListener("click", () => {
+  chat.replaceChildren();
+  setStatus("Chat cleared");
+});
+
+let recognition = null;
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
+
+$("mic").addEventListener("click", () => {
+  if (!SpeechRecognition) {
+    setStatus("Speech recognition unavailable. Try supported Chrome.");
+    return;
+  }
+
+  if (recognition) recognition.stop();
+  recognition = new SpeechRecognition();
+  recognition.lang = $("lang").value;
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    setStatus("Listening... Bolo!");
+    $("orb").style.transform = "scale(1.05)";
+  };
+
+  recognition.onresult = event => {
+    const text = event.results[0][0].transcript;
+    $("message").value = text;
+    addMessage(text, "user");
+    askJarvis(text);
+  };
+
+  recognition.onerror = event => {
+    setStatus("Voice error: " + event.error + ". Mic permission check karo.");
+  };
+
+  recognition.onend = () => {
+    $("orb").style.transform = "scale(1)";
+    if (statusBox.textContent === "Listening... Bolo!") {
+      setStatus("System Ready");
+    }
+  };
+
+  try {
+    recognition.start();
+  } catch (error) {
+    setStatus("Mic dobara try karo.");
+  }
+});
+</script>
+</body>
+</html>
+  
+  
