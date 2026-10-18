@@ -166,8 +166,6 @@ async function askJarvis(message) {
       speak(reply);
       return;
     }
-    }
-
     const response = await fetch(AI_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
