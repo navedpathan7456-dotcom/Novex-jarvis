@@ -1,175 +1,67 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#030912">
 <title>NOVEX JARVIS</title>
 <style>
-:root {
-  --cyan: #00e5ff;
-  --blue: #168bff;
-  --bg: #030912;
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0; min-height: 100vh;
-  background: radial-gradient(ellipse at top, #09264b, var(--bg) 65%);
-  color: #e8faff;
-  font-family: Arial, sans-serif;
-}
-header {
-  padding: 20px; text-align: center;
-  border-bottom: 1px solid #124b70;
-  letter-spacing: 3px;
-}
-header strong { color: var(--cyan); font-size: 23px; }
-.status { color: #83a9c6; font-size: 12px; margin-top: 8px; }
-main {
-  max-width: 600px; margin: auto;
-  padding: 18px; text-align: center;
-}
-.orb {
-  width: 190px; height: 190px; margin: 28px auto 16px;
-  border-radius: 50%;
-  border: 2px solid var(--cyan);
-  display: grid; place-items: center;
-  background: radial-gradient(circle, #0876a9, #031326 65%);
-  box-shadow: 0 0 20px #00cfff, inset 0 0 30px #0077ff;
-  animation: glow 3s infinite alternate;
-}
-.orb span { font-size: 66px; color: white; text-shadow: 0 0 24px var(--cyan); }
-@keyframes glow {
-  from { box-shadow: 0 0 12px #00cfff, inset 0 0 20px #0077ff; }
-  to { box-shadow: 0 0 35px #00cfff, inset 0 0 40px #0077ff; }
-}
-h2 { font-weight: 500; }
-#status { color: var(--cyan); min-height: 24px; }
-.panel {
-  background: #071726dd; border: 1px solid #145074;
-  border-radius: 14px; padding: 14px; margin-top: 16px;
-  text-align: left;
-}
-#chat { height: 210px; overflow-y: auto; }
-.msg { padding: 10px; margin: 8px 0; border-radius: 10px; line-height: 1.45; overflow-wrap: anywhere; }
-.user { background: #10365a; }
-.bot { background: #092b36; border: 1px solid #07576b; }
-.controls { display: flex; gap: 8px; margin-top: 12px; }
-input, select {
-  background: #06111f; color: white; border: 1px solid #17658a;
-  border-radius: 10px; padding: 12px; min-width: 0;
-}
-input { flex: 1; width: 50%; }
-button {
-  background: linear-gradient(135deg, #087fc5, #04c9e8);
-  color: #00111c; border: 0; border-radius: 10px;
-  padding: 12px; font-weight: bold; cursor: pointer;
-}
-button:disabled { opacity: .5; }
-.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.actions button { flex: 1; }
-small { color: #8aaabe; line-height: 1.5; }
-  /* NOVEX JARVIS - Arc Reactor */
-.orb {
-  position: relative;
-  width: 190px;
-  height: 190px;
-  margin: 30px auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  color: #b9faff;
-  font-size: 42px;
-  font-weight: bold;
-  background:
-    radial-gradient(circle,
-      #071d35 0 23%,
-      #00eaff 24% 27%,
-      #063b62 29% 42%,
-      #00bfff 43% 45%,
-      #04101f 47% 60%,
-      #00d9ff 61% 63%,
-      #06162a 65%);
-  border: 2px solid #38efff;
-  box-shadow:
-    0 0 15px #00d9ff,
-    0 0 35px #007bff,
-    inset 0 0 25px #00bfff;
-  animation: reactorPulse 2s ease-in-out infinite;
-}
-
-.orb::before,
-.orb::after {
-  content: "";
-  position: absolute;
-  inset: -12px;
-  border: 2px solid transparent;
-  border-top-color: #00eaff;
-  border-bottom-color: #168cff;
-  border-radius: 50%;
-  animation: reactorSpin 4s linear infinite;
-}
-
-.orb::after {
-  inset: -23px;
-  border-top-color: #168cff;
-  border-right-color: #00eaff;
-  border-bottom-color: transparent;
-  animation-duration: 6s;
-  animation-direction: reverse;
-}
-
-.orb span {
-  position: relative;
-  z-index: 2;
-  text-shadow: 0 0 12px #00eaff;
-}
-
-@keyframes reactorSpin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes reactorPulse {
-  0%, 100% {
-    filter: brightness(0.85);
-    box-shadow: 0 0 15px #00d9ff,
-                0 0 35px #007bff,
-                inset 0 0 25px #00bfff;
-  }
-  50% {
-    filter: brightness(1.4);
-    box-shadow: 0 0 25px #00eaff,
-                0 0 55px #007bff,
-                inset 0 0 35px #00bfff;
-  }
-}
-/* EXTRA POWERFUL JARVIS GLOW */
-.orb {
-  animation: reactorPulse 1.2s ease-in-out infinite !important;
-  box-shadow:
-    0 0 25px #00eaff,
-    0 0 55px #008cff,
-    0 0 90px #0066ff,
-    inset 0 0 35px #00eaff !important;
-}
-
-.orb::before {
-  border: 4px solid transparent;
-  border-top-color: #00ffff;
-  border-bottom-color: #168cff;
-  box-shadow: 0 0 20px #00dfff;
-  animation: reactorSpin 2s linear infinite !important;
-}
-
-.orb::after {
-  border: 3px solid transparent;
-  border-left-color: #00eaff;
-  border-right-color: #168cff;
-  box-shadow: 0 0 18px #008cff;
-  animation: reactorSpin 3s linear infinite reverse !important;
-}
-  
+:root{--cyan:#00efff;--blue:#168bff;--bg:#030912;--panel:rgba(5,20,37,.88);--line:#125a7b}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:#e8faff;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(ellipse at 50% 18%,#092d54 0,#041323 38%,var(--bg) 72%);overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;background-image:linear-gradient(rgba(0,210,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(0,210,255,.08) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(to bottom,black,transparent 88%)}
+header{position:relative;padding:20px 14px 16px;text-align:center;border-bottom:1px solid #124b70;letter-spacing:3px;background:rgba(2,9,18,.6)}
+header strong{color:var(--cyan);font-size:clamp(20px,5vw,28px);text-shadow:0 0 16px #00bfff}
+.status{color:#83a9c6;font-size:11px;margin-top:8px;letter-spacing:2px}
+main{position:relative;max-width:760px;margin:auto;padding:18px 16px 32px;text-align:center}
+.orb-wrap{position:relative;width:250px;height:250px;margin:18px auto 20px;display:grid;place-items:center}
+.orb{position:relative;isolation:isolate;width:174px;height:174px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#eaffff;background:radial-gradient(circle,#efffff 0 2%,#00eaff 6%,#087cff 15%,#03152e 25%,#00dfff 28%,#07315a 34%,#020918 46%,#00bfff 48%,#031329 53%,#06101f 65%);border:2px solid #00eaff;box-shadow:0 0 14px #00eaff,0 0 32px #008cff,0 0 65px #005dff,inset 0 0 28px #00bfff;animation:corePulse 1.8s ease-in-out infinite}
+.orb:before,.orb:after{content:"";position:absolute;inset:-14px;border-radius:50%;pointer-events:none}
+.orb:before{border:3px solid transparent;border-top-color:#00ffff;border-bottom-color:#168cff;box-shadow:0 0 16px #00bfff;animation:spin 2.4s linear infinite}
+.orb:after{inset:-27px;border:2px dashed #168cff;border-left-color:#00ffff;border-right-color:#00ffff;box-shadow:0 0 18px #006eff;animation:spin 5s linear infinite reverse}
+.orb span{font-size:62px;font-weight:bold;position:relative;z-index:2;text-shadow:0 0 10px #00ffff,0 0 28px #00aaff,0 0 42px #0066ff}
+.orb-wrap .orbit{position:absolute;border-radius:50%;border:1px solid rgba(0,229,255,.48);inset:9px;animation:spin 12s linear infinite}
+.orb-wrap .orbit.two{inset:0;border-style:dotted;border-color:rgba(22,139,255,.8);animation-duration:18s;animation-direction:reverse}
+.orb-wrap .orbit:before,.orb-wrap .orbit.two:after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:#b9ffff;box-shadow:0 0 14px #00eaff;top:12%;left:19%}
+.orb-wrap .orbit.two:after{top:auto;left:auto;bottom:13%;right:17%}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes corePulse{0%,100%{filter:brightness(.85);box-shadow:0 0 14px #00eaff,0 0 32px #008cff,0 0 65px #005dff,inset 0 0 28px #00bfff}50%{filter:brightness(1.5);box-shadow:0 0 25px #00ffff,0 0 55px #008cff,0 0 95px #005dff,inset 0 0 40px #00eaff}}
+h2{font-weight:500;margin:10px 0 8px;letter-spacing:1px}
+#status{color:var(--cyan);min-height:24px;font-size:14px;text-shadow:0 0 10px #008cff}
+body.listening .orb{animation-duration:.7s;filter:brightness(1.45)}
+body.listening .orb:before{animation-duration:.8s}
+body.listening .orb:after{animation-duration:1.5s}
+body.thinking .orb{animation-duration:.45s}
+body.thinking .orb:before{animation-duration:1.1s}
+body.speaking .orb{animation-duration:.9s}
+body.speaking .orb:after{animation-duration:2s}
+.wave{height:38px;display:flex;align-items:center;justify-content:center;gap:4px;margin:12px auto 16px;max-width:330px;opacity:.82}
+.wave i{display:block;width:3px;height:8px;border-radius:8px;background:var(--cyan);box-shadow:0 0 8px #00dfff;animation:wave 1s ease-in-out infinite}
+.wave i:nth-child(3n){animation-delay:.2s}.wave i:nth-child(3n + 1){animation-delay:.45s}.wave i:nth-child(4n){animation-delay:.65s}
+@keyframes wave{0%,100%{height:7px;opacity:.5}50%{height:29px;opacity:1}}
+.panel{background:var(--panel);border:1px solid #145074;border-radius:16px;padding:15px;margin-top:15px;text-align:left;box-shadow:0 8px 30px #0005,inset 0 0 20px #008cff08;backdrop-filter:blur(8px)}
+label,.panel strong{color:#bcefff}
+#chat{height:190px;overflow-y:auto;margin-top:12px;scrollbar-color:#126b91 #071726}
+.msg{padding:10px 12px;margin:8px 0;border-radius:10px;line-height:1.45;overflow-wrap:anywhere;font-size:14px}
+.user{background:#10365a;border:1px solid #1b6390}
+.bot{background:#092b36;border:1px solid #07576b}
+.controls{display:flex;gap:8px;margin-top:12px}
+input,select{background:#06111f;color:white;border:1px solid #17658a;border-radius:10px;padding:12px;min-width:0;font-size:14px}
+input{flex:1;width:50%}
+button{background:linear-gradient(135deg,#087fc5,#04c9e8);color:#00111c;border:0;border-radius:10px;padding:12px;font-weight:bold;cursor:pointer;transition:transform .15s,filter .15s}
+button:active{transform:scale(.97);filter:brightness(1.15)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.actions button{flex:1;min-width:110px}
+button.secondary{background:#092239;color:#b8f5ff;border:1px solid #17658a}
+button.danger{background:#321827;color:#ffd8e5;border:1px solid #85405b}
+small,.hint{color:#8aaabe;line-height:1.6;font-size:12px}
+.feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.feature{padding:10px;border:1px solid #124b70;border-radius:10px;background:#041321;color:#a8d9ed;font-size:12px}
+.feature b{display:block;color:#00e5ff;margin-bottom:5px}
+footer{padding:20px 8px 0;color:#477e9b;font-size:10px;letter-spacing:2px;text-align:center}
+@media(max-width:420px){main{padding:14px 12px 28px}.orb-wrap{transform:scale(.9);margin:4px auto 8px}.panel{padding:12px}.controls{gap:6px}.controls button{padding:11px}.feature-grid{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:8s!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
@@ -177,14 +69,17 @@ small { color: #8aaabe; line-height: 1.5; }
   <strong>NOVEX JARVIS</strong>
   <div class="status">PERSONAL AI • BLUE/CYAN SYSTEM</div>
 </header>
-
 <main>
-  <div class="orb" id="orb"><span>N</span></div>
-  <h2>Your AI Assistant</h2>
-  <div id="status" role="status">System Ready</div>
+  <div class="orb-wrap" aria-label="Animated NOVEX reactor">
+    <div class="orbit"></div><div class="orbit two"></div>
+    <div class="orb" id="orb"><span>N</span></div>
+  </div>
+  <h2>NOVEX AI CORE</h2>
+  <div id="status" role="status" aria-live="polite">SYSTEM READY</div>
+  <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
 
   <div class="panel">
-    <label for="lang">Voice language</label><br><br>
+    <label for="lang">Voice language / Bhasha</label><br><br>
     <select id="lang">
       <option value="hi-IN">Hindi</option>
       <option value="en-IN">English (India)</option>
@@ -194,43 +89,47 @@ small { color: #8aaabe; line-height: 1.5; }
       <div class="msg bot">Hello! Main NOVEX JARVIS hoon. Bolo, main kaise madad karun?</div>
     </div>
     <div class="controls">
-      <input id="message" placeholder="Type your message..." maxlength="2000">
+      <input id="message" placeholder="Type your message..." maxlength="2000" autocomplete="off">
       <button id="send">Send</button>
     </div>
     <div class="actions">
       <button id="mic">🎙 Speak</button>
-      <button id="stop">■ Stop Voice</button>
-      <button id="clear">Clear Chat</button>
+      <button id="wake" class="secondary">◉ Hey Jarvis</button>
+      <button id="stop" class="danger">■ Stop</button>
+      <button id="clear" class="secondary">Clear Chat</button>
     </div>
+    <p class="hint">“Speak” listens for one command. “Hey Jarvis” starts wake-word listening while this page stays open and the browser allows microphone access. It may not work when the screen is locked or the browser is in the background.</p>
   </div>
 
   <div class="panel">
-    <strong>System Features</strong><br><br>
-    <small>
-      ✓ Iron Man inspired interface<br>
-      ✓ Hindi and English speech input (supported browsers)<br>
-      ✓ Spoken responses<br>
-      ✓ AI service connection point<br>
-      ✓ Android and desktop browser prototype
-    </small>
+    <strong>SYSTEM MODULES</strong>
+    <div class="feature-grid">
+      <div class="feature"><b>◉ ARC REACTOR</b>Animated cyan energy core</div>
+      <div class="feature"><b>◖ VOICE INPUT</b>Browser speech recognition</div>
+      <div class="feature"><b>✦ AI CORE</b>Secure backend connection</div>
+      <div class="feature"><b>♫ VOICE OUTPUT</b>Spoken assistant replies</div>
+    </div>
   </div>
-  <p><small>Prototype v0.1 • AI service not connected yet</small></p>
+  <footer>NOVEX JARVIS • THINK • ANALYZE • ASSIST</footer>
 </main>
-
 <script>
-// Keep empty until a secure AI backend is configured.
-// Never put a private AI API key in this HTML file.
-const AI_ENDPOINT = "https://wild-queen-d53d.navedpathan7456.workers.dev/";
-
+const AI_ENDPOINT = "https://wild-queen-d53d.navedpath7456.workers.dev/";
 const $ = id => document.getElementById(id);
 const chat = $("chat");
 const statusBox = $("status");
 let busy = false;
+let recognition = null;
+let wakeMode = false;
+let waitingForCommand = false;
+let restartingWake = false;
+let speechGeneration = 0;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-function setStatus(text) {
+function setStatus(text, mode) {
   statusBox.textContent = text;
+  document.body.classList.remove("listening","thinking","speaking");
+  if (mode) document.body.classList.add(mode);
 }
-
 function addMessage(text, who) {
   const div = document.createElement("div");
   div.className = "msg " + who;
@@ -238,141 +137,193 @@ function addMessage(text, who) {
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
 }
-
 function speak(text) {
-  if (!("speechSynthesis" in window)) {
-    setStatus("Speech output not supported in this browser.");
-    return;
-  }
+  if (!("speechSynthesis" in window)) return;
+  speechGeneration++;
+  const currentGeneration = speechGeneration;
   speechSynthesis.cancel();
-
-const utterance = new SpeechSynthesisUtterance(text);
-utterance.lang = $("lang").value;
-utterance.rate = 0.88;
-utterance.pitch = 0.65;
-utterance.volume = 1;
-
-speechSynthesis.speak(utterance);
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = $("lang").value;
+  utterance.rate = 0.9;
+  utterance.pitch = 0.72;
+  utterance.volume = 1;
+  utterance.onstart = () => setStatus("JARVIS SPEAKING...", "speaking");
+  utterance.onend = () => {
+    if (currentGeneration === speechGeneration && !wakeMode) setStatus("SYSTEM READY");
+    else if (currentGeneration === speechGeneration && wakeMode) setStatus("SAY “HEY JARVIS”", "listening");
+  };
+  utterance.onerror = () => {
+    if (currentGeneration === speechGeneration && !wakeMode) setStatus("SYSTEM READY");
+  };
+  speechSynthesis.speak(utterance);
 }
-
 async function askJarvis(message) {
-  if (busy) return;
+  if (busy || !message.trim()) return;
   busy = true;
   $("send").disabled = true;
-  setStatus("Processing...");
-
+  $("mic").disabled = true;
+  setStatus("AI CORE PROCESSING...", "thinking");
   try {
-    if (!AI_ENDPOINT) {
-      const reply =
-        "Abhi mera AI connect nahi hua hai. AI enable karne ke liye " +
-        "secure backend setup karna hoga. Filhaal mera voice interface ready hai.";
-      addMessage(reply, "bot");
-      setStatus("Demo mode — AI not connected");
-      speak(reply);
-      return;
-      
-    }
     const response = await fetch(AI_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: message,
-        language: $("lang").value
-      })
+      body: JSON.stringify({ message: message, language: $("lang").value })
     });
-
-    if (!response.ok) throw new Error("AI service error");
+    if (!response.ok) throw new Error("AI service error (" + response.status + ")");
     const data = await response.json();
-    if (typeof data.reply !== "string") {
-      throw new Error("Invalid server response");
-    }
-
+    if (typeof data.reply !== "string") throw new Error("Invalid server response");
     addMessage(data.reply, "bot");
-    setStatus("Response ready");
     speak(data.reply);
   } catch (error) {
-    addMessage("AI Error: " + error.message, "bot");
-    setStatus("Connection error");
+    addMessage("AI connection error: " + error.message + ". Internet aur backend check karo.", "bot");
+    setStatus("CONNECTION ERROR");
   } finally {
     busy = false;
     $("send").disabled = false;
+    $("mic").disabled = false;
+    if (wakeMode && !recognition) startWakeRecognition();
   }
 }
-
-$("send").addEventListener("click", () => {
+function sendTypedMessage() {
   const message = $("message").value.trim();
-  if (!message) return;
+  if (!message || busy) return;
   addMessage(message, "user");
   $("message").value = "";
   askJarvis(message);
-});
+}
+$("send").addEventListener("click", sendTypedMessage);
+$("message").addEventListener("keydown", event => { if (event.key === "Enter") sendTypedMessage(); });
 
-$("message").addEventListener("keydown", event => {
-  if (event.key === "Enter") $("send").click();
-});
-
-$("stop").addEventListener("click", () => {
-  if ("speechSynthesis" in window) speechSynthesis.cancel();
-  if (recognition) recognition.stop();
-  setStatus("Voice stopped");
-});
-
-$("clear").addEventListener("click", () => {
-  chat.replaceChildren();
-  setStatus("Chat cleared");
-});
-
-let recognition = null;
-const SpeechRecognition =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
-
+function createRecognition(continuous) {
+  const rec = new SpeechRecognition();
+  rec.lang = $("lang").value;
+  rec.continuous = continuous;
+  rec.interimResults = false;
+  return rec;
+}
 $("mic").addEventListener("click", () => {
   if (!SpeechRecognition) {
-    setStatus("Speech recognition unavailable. Try supported Chrome.");
+    setStatus("VOICE INPUT UNSUPPORTED — Chrome try karo");
+    addMessage("Is browser mein speech recognition available nahi hai. Android Chrome mein microphone permission allow karke try karo.", "bot");
     return;
   }
-
-  if (recognition) recognition.stop();
-  recognition = new SpeechRecognition();
-  recognition.lang = $("lang").value;
-  recognition.continuous = false;
-  recognition.interimResults = false;
-
-  recognition.onstart = () => {
-    setStatus("Listening... Bolo!");
-    $("orb").style.transform = "scale(1.05)";
-  };
-
+  stopRecognitionOnly();
+  wakeMode = false;
+  waitingForCommand = false;
+  recognition = createRecognition(false);
+  recognition.onstart = () => setStatus("LISTENING — BOLO!", "listening");
   recognition.onresult = event => {
-    const text = event.results[0][0].transcript;
+    const text = event.results[0][0].transcript.trim();
+    if (!text) return;
     $("message").value = text;
     addMessage(text, "user");
     askJarvis(text);
   };
-
-  recognition.onerror = event => {
-    setStatus("Voice error: " + event.error + ". Mic permission check karo.");
-  };
-
+  recognition.onerror = event => setStatus("VOICE ERROR: " + event.error);
   recognition.onend = () => {
-    $("orb").style.transform = "scale(1)";
-    if (statusBox.textContent === "Listening... Bolo!") {
-      setStatus("System Ready");
-    }
+    recognition = null;
+    if (!busy && !wakeMode) setStatus("SYSTEM READY");
   };
+  try { recognition.start(); } catch (error) { setStatus("MIC DOBARA TRY KARO"); }
+});
 
-  try {
-    recognition.start();
-  } catch (error) {
-    setStatus("Mic dobara try karo.");
+function stopRecognitionOnly() {
+  restartingWake = false;
+  if (recognition) {
+    const old = recognition;
+    recognition = null;
+    try { old.onend = null; old.stop(); } catch (_) {}
   }
+}
+function startWakeRecognition() {
+  if (!wakeMode || !SpeechRecognition || recognition || busy) return;
+  try {
+    const rec = createRecognition(true);
+    recognition = rec;
+    rec.onstart = () => setStatus(waitingForCommand ? "JARVIS ACTIVE — COMMAND BOLO" : "SAY “HEY JARVIS”", "listening");
+    rec.onresult = event => {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (!event.results[i].isFinal) continue;
+        const heard = event.results[i][0].transcript.trim();
+        const normalized = heard.toLowerCase().replace(/[.,!?]/g,"");
+        const wakeMatch = /\b(hey\s+)?jarvis\b/.test(normalized) || /\bhey\s+jar\b/.test(normalized);
+        if (!waitingForCommand && wakeMatch) {
+          waitingForCommand = true;
+          const remainder = normalized.replace(/^.*?\bjarvis\b/,"").trim();
+          if (remainder.length > 1) {
+            addMessage(heard, "user");
+            waitingForCommand = false;
+            stopRecognitionOnly();
+            askJarvis(remainder);
+          } else {
+            setStatus("YES, BOLO — COMMAND BOLO", "listening");
+          }
+        } else if (waitingForCommand && heard) {
+          waitingForCommand = false;
+          addMessage(heard, "user");
+          stopRecognitionOnly();
+          askJarvis(heard);
+        }
+      }
+    };
+    rec.onerror = event => {
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        wakeMode = false;
+        setStatus("MIC PERMISSION ALLOW KARO");
+        addMessage("Wake word ke liye browser microphone permission chahiye. Address bar ke lock/settings se microphone allow karo.", "bot");
+      }
+    };
+    rec.onend = () => {
+      if (recognition === rec) recognition = null;
+      if (wakeMode && !busy && !restartingWake) {
+        restartingWake = true;
+        setTimeout(() => { restartingWake = false; startWakeRecognition(); }, 500);
+      }
+    };
+    rec.start();
+  } catch (_) {
+    recognition = null;
+    if (wakeMode) setStatus("WAKE WORD RESTART — DOBARA TRY KARO");
+  }
+}
+$("wake").addEventListener("click", () => {
+  if (!SpeechRecognition) {
+    setStatus("WAKE WORD UNSUPPORTED IN THIS BROWSER");
+    addMessage("Wake word ke liye supported browser speech recognition chahiye. Android Chrome mein website kholkar try karo.", "bot");
+    return;
+  }
+  if (wakeMode) {
+    wakeMode = false;
+    waitingForCommand = false;
+    stopRecognitionOnly();
+    setStatus("WAKE WORD OFF");
+    $("wake").textContent = "◉ Hey Jarvis";
+    return;
+  }
+  wakeMode = true;
+  waitingForCommand = false;
+  $("wake").textContent = "◉ Wake Word ON";
+  setStatus("MIC STARTING...", "listening");
+  startWakeRecognition();
+});
+$("stop").addEventListener("click", () => {
+  wakeMode = false;
+  waitingForCommand = false;
+  stopRecognitionOnly();
+  speechGeneration++;
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  $("wake").textContent = "◉ Hey Jarvis";
+  setStatus("VOICE STOPPED");
+});
+$("clear").addEventListener("click", () => {
+  chat.replaceChildren();
+  setStatus("CHAT CLEARED");
+});
+window.addEventListener("pagehide", () => {
+  wakeMode = false;
+  stopRecognitionOnly();
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
 });
 </script>
 </body>
 </html>
-  
-
-
-
-
-  
