@@ -186,7 +186,7 @@ async function askJarvis(message) {
     setStatus("Response ready");
     speak(data.reply);
   } catch (error) {
-    addMessage("AI service connect nahi ho payi. Backend aur internet check karo.", "bot");
+    addMessage("AI Error: " + error.message, "bot");
     setStatus("Connection error");
   } finally {
     busy = false;
