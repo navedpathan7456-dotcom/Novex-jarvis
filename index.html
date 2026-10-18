@@ -144,10 +144,14 @@ function speak(text) {
     return;
   }
   speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = $("lang").value;
-  utterance.rate = 1;
-  speechSynthesis.speak(utterance);
+
+const utterance = new SpeechSynthesisUtterance(text);
+utterance.lang = $("lang").value;
+utterance.rate = 0.88;
+utterance.pitch = 0.65;
+utterance.volume = 1;
+
+speechSynthesis.speak(utterance);
 }
 
 async function askJarvis(message) {
