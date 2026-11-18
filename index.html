@@ -148,31 +148,43 @@ function addMessage(text, who) {
 
   speechSynthesis.cancel();
 
-  const utterance = new SpeechSynthesisUtterance(text);
-  const lang = $("lang").value || "hi-IN";
+  const u = new SpeechSynthesisUtterance(text);
+  const selectedLang = $("lang").value || "en-US";
 
-  utterance.lang = lang;
-  utterance.rate = 0.95;
-  utterance.pitch = 0.85;
-  utterance.volume = 1;
+  u.lang = selectedLang;
+  u.rate = 0.90;
+  u.pitch = 0.72;
+  u.volume = 1;
+
+  function selectVoice() {
+    const voices = speechSynthesis.getVoices();
+    const baseLang = selectedLang.split("-")[0].toLowerCase();
+
+    const matching = voices.filter(v =>
+      v.lang.toLowerCase().startsWith(baseLang)
+    );
+
+    const preferred = matching.find(v =>
+      /google|natural|enhanced/i.test(v.name)
+    );
+
+    if (preferred) {
+      u.voice = preferred;
+    } else if (matching.length > 0) {
+      u.voice = matching[0];
+    }
+
+    speechSynthesis.speak(u);
+  }
 
   const voices = speechSynthesis.getVoices();
 
-  let voice = voices.find(v => v.lang === lang);
-
-  if (!voice) {
-    voice = voices.find(v =>
-      v.lang.toLowerCase().startsWith(
-        lang.split("-")[0].toLowerCase()
-      )
-    );
+  if (voices.length) {
+    selectVoice();
+  } else {
+    speechSynthesis.onvoiceschanged = selectVoice;
+    speechSynthesis.getVoices();
   }
-
-  if (voice) {
-    utterance.voice = voice;
-  }
-
-  speechSynthesis.speak(utterance);
   }
   if (!("speechSynthesis" in window)) return;
   speechGeneration++;
