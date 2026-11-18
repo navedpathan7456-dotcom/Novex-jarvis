@@ -143,7 +143,37 @@ function addMessage(text, who) {
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
 }
-function speak(text) {
+  function speak(text) {
+  if (!text || !window.speechSynthesis) return;
+
+  speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  const lang = $("lang").value || "hi-IN";
+
+  utterance.lang = lang;
+  utterance.rate = 0.95;
+  utterance.pitch = 0.85;
+  utterance.volume = 1;
+
+  const voices = speechSynthesis.getVoices();
+
+  let voice = voices.find(v => v.lang === lang);
+
+  if (!voice) {
+    voice = voices.find(v =>
+      v.lang.toLowerCase().startsWith(
+        lang.split("-")[0].toLowerCase()
+      )
+    );
+  }
+
+  if (voice) {
+    utterance.voice = voice;
+  }
+
+  speechSynthesis.speak(utterance);
+  }
   if (!("speechSynthesis" in window)) return;
   speechGeneration++;
   const currentGeneration = speechGeneration;
