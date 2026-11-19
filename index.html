@@ -354,56 +354,54 @@ function addMessage(text, type){
   $("chat").scrollTop = $("chat").scrollHeight;
 }
 
-function speak(text){
-  if(!text || !("speechSynthesis" in window)) return;
-
-  speechGeneration++;
-  const currentGeneration = speechGeneration;
+function speak(text) {
+  if (!text || !("speechSynthesis" in window)) {
+    setStatus("VOICE NOT AVAILABLE");
+    return;
+  }
 
   speechSynthesis.cancel();
 
   const utterance = new SpeechSynthesisUtterance(text);
-  const lang = $("lang").value;
+  const selectedLang = $("lang").value || "en-US";
 
-  utterance.lang = lang;
-  utterance.rate = 0.92;
-  utterance.pitch = 0.78;
+  utterance.lang = selectedLang;
+  utterance.rate = 0.90;
+  utterance.pitch = 0.82;
   utterance.volume = 1;
 
   const voices = speechSynthesis.getVoices();
-  const baseLang = lang.split("-")[0].toLowerCase();
 
-  const matching = voices.filter(v =>
-    v.lang.toLowerCase().startsWith(baseLang)
+  const language = selectedLang.split("-")[0].toLowerCase();
+
+  const matchingVoices = voices.filter(voice =>
+    voice.lang.toLowerCase().startsWith(language)
   );
 
-  const preferred = matching.find(v =>
-    /natural|enhanced/i.test(v.name)
+  const preferredVoice = matchingVoices.find(voice =>
+    /natural|enhanced/i.test(voice.name)
   );
 
-  if(preferred) utterance.voice = preferred;
-  else if(matching.length) utterance.voice = matching[0];
+  if (preferredVoice) {
+    utterance.voice = preferredVoice;
+  } else if (matchingVoices.length > 0) {
+    utterance.voice = matchingVoices[0];
+  }
 
   utterance.onstart = () => {
-    if(currentGeneration === speechGeneration){
-      setStatus("JARVIS SPEAKING");
-      $("voiceMetric").textContent = "ACTIVE";
-      $("liveVoice").textContent = "ACTIVE";
-    }
+    setStatus("JARVIS SPEAKING...");
+    $("voiceMetric").textContent = "ACTIVE";
+    $("liveVoice").textContent = "ACTIVE";
   };
 
   utterance.onend = () => {
-    if(currentGeneration === speechGeneration){
-      setStatus("SYSTEM READY");
-      $("voiceMetric").textContent = "READY";
-      $("liveVoice").textContent = "READY";
-    }
+    setStatus("SYSTEM READY");
+    $("voiceMetric").textContent = "READY";
+    $("liveVoice").textContent = "READY";
   };
 
   utterance.onerror = () => {
-    if(currentGeneration === speechGeneration){
-      setStatus("SYSTEM READY");
-    }
+    setStatus("VOICE ERROR");
   };
 
   speechSynthesis.speak(utterance);
