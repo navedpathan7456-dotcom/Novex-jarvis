@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#030912">
+<title>NOVEX JARVIS</title>
+
+<style>
+:root{
+  --cyan:#00efff;
+  --blue:#168bff;
+  --bg:#030912;
+  --panel:rgba(5,20,37,.85);
+  --border:rgba(0,239,255,.22);
+  --text:#e8faff;
+  --muted:#8ba9bb;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 50% 35%,#08233c 0%,#030912 48%,#01040a 100%);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+  overflow-x:hidden;
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh}
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 25px;border-bottom:1px solid var(--border);
+  background:rgba(2,10,20,.8);backdrop-filter:blur(12px);
+}
+.logo{font-size:22px;font-weight:900;letter-spacing:4px;color:var(--cyan)}
+.header-status{font-size:11px;letter-spacing:2px;color:var(--cyan)}
+.layout{
+  display:grid;grid-template-columns:250px minmax(0,1fr) 270px;
+  gap:18px;padding:18px;max-width:1600px;margin:auto;
+}
+.panel{
+  border:1px solid var(--border);border-radius:15px;
+  background:var(--panel);padding:18px;
+  box-shadow:0 0 25px rgba(0,150,255,.05);
+}
+.panel-title{
+  font-size:12px;letter-spacing:2px;color:var(--cyan);
+  margin-bottom:15px;
+}
+.module{
+  padding:15px;margin-bottom:10px;border:1px solid var(--border);
+  border-radius:10px;background:rgba(0,100,180,.06);
+}
+.module strong{font-size:12px;letter-spacing:1px}
+.module small{display:block;color:var(--muted);margin-top:7px}
+.center{min-width:0}
+.core-section{
+  text-align:center;border:1px solid var(--border);
+  border-radius:16px;background:rgba(4,18,35,.55);
+  padding:24px 10px 20px;
+}
+.core{
+  width:220px;height:220px;margin:12px auto 20px;
+  border-radius:50%;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle,#0c3658 0%,#03111f 55%,#01060c 100%);
+  box-shadow:0 0 30px #008cff55,inset 0 0 30px #00e5ff22;
+}
+.core:before,.core:after{
+  content:"";position:absolute;border-radius:50%;
+  border:2px solid transparent;
+}
+.core:before{
+  inset:8px;border-top-color:var(--cyan);border-bottom-color:var(--blue);
+  animation:spin 5s linear infinite;
+}
+.core:after{
+  inset:22px;border-left-color:var(--cyan);border-right-color:var(--blue);
+  animation:spin 3s linear infinite reverse;
+}
+.core-inner{
+  width:95px;height:95px;border-radius:50%;
+  background:radial-gradient(circle,#b9ffff 0%,#00e5ff 18%,#168bff 48%,#041629 75%);
+  box-shadow:0 0 30px var(--cyan),0 0 70px #168bff66;
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{transform:scale(1.1);filter:brightness(1.4)}}
+.core-label{letter-spacing:4px;font-size:13px;color:var(--cyan)}
+.core-status{font-size:11px;color:var(--muted);margin-top:10px}
+.metrics{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:10px;margin-top:14px;
+}
+.metric{
+  border:1px solid var(--border);border-radius:10px;
+  padding:14px 5px;background:rgba(0,100,180,.06);
+}
+.metric strong{display:block;color:var(--cyan);font-size:16px}
+.metric span{font-size:10px;color:var(--muted);letter-spacing:1px}
+.chat-panel{margin-top:18px}
+.chat{
+  height:300px;overflow-y:auto;padding:5px;
+  display:flex;flex-direction:column;gap:12px;
+}
+.message{
+  max-width:90%;padding:12px;border-radius:12px;
+  font-size:14px;line-height:1.5;white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+.user{
+  align-self:flex-end;background:rgba(22,139,255,.16);
+  border:1px solid #168bff55;
+}
+.bot{
+  align-self:flex-start;background:rgba(0,239,255,.06);
+  border:1px solid var(--border);
+}
+.message-label{
+  display:block;font-size:10px;letter-spacing:1px;
+  color:var(--cyan);margin-bottom:6px;
+}
+.input-row{display:flex;gap:8px;margin-top:12px}
+input,select{
+  color:var(--text);background:#061321;
+  border:1px solid var(--border);border-radius:10px;
+  padding:12px;outline:none;
+}
+input{flex:1;min-width:0}
+select{max-width:115px}
+input:focus,select:focus{border-color:var(--cyan)}
+.btn{
+  border:1px solid var(--border);border-radius:10px;
+  padding:12px;background:rgba(0,150,255,.12);
+  color:var(--cyan);font-weight:bold;
+  transition:.2s;
+}
+.btn:hover{background:rgba(0,239,255,.2);box-shadow:0 0 15px #00efff33}
+.btn.primary{background:rgba(0,239,255,.15)}
+.btn.danger{color:#ff8292;border-color:#ff829255}
+.controls{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+.controls .btn{flex:1}
+.list{
+  display:flex;justify-content:space-between;
+  padding:12px 0;border-bottom:1px solid #0b2638;
+  font-size:12px;
+}
+.list span:last-child{color:var(--cyan)}
+.foot{
+  text-align:center;color:#57788c;
+  font-size:10px;letter-spacing:2px;padding:20px;
+}
+@media(max-width:1050px){
+  .layout{grid-template-columns:220px minmax(0,1fr)}
+  .right{grid-column:1/-1}
+  .right-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+}
+@media(max-width:700px){
+  header{padding:15px}
+  .logo{font-size:18px;letter-spacing:2px}
+  .header-status{font-size:9px}
+  .layout{display:flex;flex-direction:column;padding:10px}
+  .left,.right{width:100%}
+  .center{width:100%}
+  .core{width:190px;height:190px}
+  .chat{height:260px}
+  .right-grid{display:block}
+  .input-row{flex-wrap:wrap}
+  select{max-width:none;width:100%}
+}
+
+/* ===== NOVEX JARVIS: ULTIMATE HOLOGRAPHIC VISUAL UPGRADE ===== */
+html { scroll-behavior:smooth; }
+body {
+  position:relative;
+  isolation:isolate;
+  background:
+    radial-gradient(ellipse at 50% 18%,rgba(0,173,255,.17),transparent 42%),
+    radial-gradient(ellipse at 12% 75%,rgba(0,239,255,.08),transparent 35%),
+    radial-gradient(ellipse at 88% 68%,rgba(22,139,255,.10),transparent 38%),
+    linear-gradient(135deg,#01050c 0%,#041426 48%,#01050c 100%);
+}
+body:before {
+  content:"";
+  position:fixed; inset:0; z-index:-2; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,210,255,.055) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,210,255,.055) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom,transparent 0%,black 22%,black 80%,transparent 100%);
+  animation:gridDrift 24s linear infinite;
+}
+body:after {
+  content:""; position:fixed; inset:0; z-index:8; pointer-events:none;
+  opacity:.15;
+  background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(0,220,255,.12) 4px);
+  mix-blend-mode:screen;
+}
+@keyframes gridDrift { to { background-position:42px 42px; } }
+.app { position:relative; z-index:1; }
+.app:before {
+  content:""; position:fixed; width:55vw; height:55vw; max-width:650px; max-height:650px;
+  border:1px solid rgba(0,220,255,.08); border-radius:50%; left:50%; top:42%;
+  transform:translate(-50%,-50%); pointer-events:none; z-index:-1;
+  box-shadow:0 0 80px rgba(0,170,255,.05),inset 0 0 80px rgba(0,170,255,.04);
+  animation:ambientPulse 7s ease-in-out infinite;
+}
+@keyframes ambientPulse { 50% { opacity:.35; transform:translate(-50%,-50%) scale(1.08); } }
+header {
+  position:sticky; top:0; z-index:10;
+  border-bottom:1px solid rgba(0,239,255,.32);
+  box-shadow:0 8px 35px rgba(0,0,0,.28),0 1px 18px rgba(0,210,255,.08);
+}
+.logo {
+  text-shadow:0 0 8px rgba(0,239,255,.9),0 0 24px rgba(0,160,255,.55);
+  animation:logoGlow 3s ease-in-out infinite;
+}
+@keyframes logoGlow { 50% { text-shadow:0 0 14px #00efff,0 0 34px #168bff; } }
+.header-status:before {
+  content:""; display:inline-block; width:7px; height:7px; margin:0 9px 1px 0;
+  border-radius:50%; background:#39ffbd; box-shadow:0 0 10px #39ffbd;
+  animation:statusBlink 1.6s ease-in-out infinite;
+}
+@keyframes statusBlink { 50% { opacity:.35; } }
+.layout { position:relative; }
+.panel,.core-section {
+  position:relative; overflow:hidden;
+  border-color:rgba(0,225,255,.28);
+  background:linear-gradient(145deg,rgba(5,24,43,.88),rgba(2,10,22,.82));
+  box-shadow:0 12px 38px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.035),0 0 22px rgba(0,160,255,.055);
+  backdrop-filter:blur(14px);
+  animation:panelReveal .8s ease both;
+}
+.left { animation-delay:.08s; }
+.center { animation-delay:.18s; }
+.right { animation-delay:.28s; }
+@keyframes panelReveal { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+.panel:before,.core-section:before {
+  content:""; position:absolute; left:-100%; top:0; width:55%; height:1px;
+  background:linear-gradient(90deg,transparent,#00efff,transparent);
+  animation:panelSweep 8s linear infinite;
+}
+@keyframes panelSweep { to { left:150%; } }
+.panel-title { text-shadow:0 0 12px rgba(0,239,255,.45); }
+.module,.metric {
+  position:relative; overflow:hidden;
+  background:linear-gradient(120deg,rgba(0,145,220,.10),rgba(0,40,75,.12));
+  border-color:rgba(0,220,255,.2);
+  transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;
+}
+.module:hover,.metric:hover {
+  transform:translateY(-3px);
+  border-color:rgba(0,239,255,.65);
+  box-shadow:0 0 20px rgba(0,210,255,.12);
+}
+.module:after,.metric:after {
+  content:""; position:absolute; top:0; left:-130%; width:70%; height:100%;
+  background:linear-gradient(100deg,transparent,rgba(0,239,255,.08),transparent);
+  transition:left .7s ease;
+}
+.module:hover:after,.metric:hover:after { left:140%; }
+.core-section {
+  background:
+    radial-gradient(ellipse at 50% 43%,rgba(0,130,210,.13),transparent 48%),
+    rgba(4,18,35,.62);
+}
+.core {
+  width:238px;height:238px;
+  background:
+    radial-gradient(circle,rgba(0,239,255,.12) 0 27%,transparent 28%),
+    radial-gradient(circle,#082744 0%,#03111f 56%,#01060c 100%);
+  box-shadow:0 0 28px rgba(0,160,255,.35),0 0 75px rgba(0,180,255,.16),inset 0 0 35px rgba(0,239,255,.12);
+  animation:coreFloat 5s ease-in-out infinite;
+}
+@keyframes coreFloat { 50% { transform:translateY(-5px); } }
+.core:before { inset:5px; border-width:2px; box-shadow:0 0 18px rgba(0,239,255,.3); }
+.core:after { inset:17px; border-width:1px; }
+.core-inner {
+  width:88px;height:88px; z-index:2;
+  background:radial-gradient(circle,#fff 0%,#aaffff 10%,#00efff 28%,#168bff 58%,#041629 78%);
+  box-shadow:0 0 18px #00efff,0 0 45px #00bfff,0 0 90px rgba(0,130,255,.65);
+  animation:reactorPulse 1.8s ease-in-out infinite;
+}
+@keyframes reactorPulse {
+  0%,100% { transform:scale(.94); filter:brightness(1); }
+  50% { transform:scale(1.12); filter:brightness(1.55); }
+}
+.reactor-ring {
+  position:absolute; border:1px solid rgba(0,239,255,.58); border-radius:50%;
+  pointer-events:none; box-shadow:0 0 12px rgba(0,210,255,.18);
+}
+.reactor-ring.ring-one { inset:29px; border-style:dashed; animation:spin 13s linear infinite; }
+.reactor-ring.ring-two { inset:42px; border-color:rgba(22,139,255,.7); border-left-style:dotted; animation:spin 8s linear infinite reverse; }
+.reactor-ring.ring-three { inset:-7px; border-color:rgba(0,239,255,.2); border-top-color:rgba(0,239,255,.8); border-bottom-color:rgba(22,139,255,.8); animation:spin 18s linear infinite; }
+.core-label { text-shadow:0 0 14px rgba(0,239,255,.6); }
+.core-status { letter-spacing:2px; }
+.metric { box-shadow:inset 0 0 18px rgba(0,160,255,.04); }
+.chat-panel { border-color:rgba(0,239,255,.3); }
+.chat {
+  border:1px solid rgba(0,220,255,.10); border-radius:12px;
+  background:linear-gradient(180deg,rgba(0,7,16,.32),rgba(0,20,36,.24));
+  scrollbar-color:#087eaa #061321; scrollbar-width:thin;
+}
+.message {
+  position:relative; box-shadow:0 5px 18px rgba(0,0,0,.15);
+  animation:messageIn .35s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes messageIn { from { opacity:0; transform:translateY(9px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
+.user { border-radius:13px 13px 3px 13px; box-shadow:0 0 18px rgba(22,139,255,.08); }
+.bot { border-radius:13px 13px 13px 3px; box-shadow:0 0 18px rgba(0,239,255,.07); }
+input,select {
+  transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;
+}
+input:focus,select:focus {
+  border-color:var(--cyan); box-shadow:0 0 0 3px rgba(0,239,255,.08),0 0 18px rgba(0,239,255,.12);
+  background:#071a2c;
+}
+.btn {
+  position:relative; overflow:hidden;
+  transition:transform .2s ease,background .2s ease,box-shadow .2s ease,border-color .2s ease;
+  box-shadow:inset 0 0 14px rgba(0,170,255,.04);
+}
+.btn:before {
+  content:""; position:absolute; top:-50%; left:-120%; width:65%; height:200%;
+  transform:skewX(-22deg); background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);
+  transition:left .55s ease;
+}
+.btn:hover:before { left:150%; }
+.btn:hover { transform:translateY(-2px); border-color:rgba(0,239,255,.65); }
+.btn:active { transform:scale(.97); }
+.btn.primary { box-shadow:0 0 18px rgba(0,239,255,.12),inset 0 0 15px rgba(0,239,255,.08); }
+.btn.danger:hover { box-shadow:0 0 16px rgba(255,80,110,.18); }
+.list { border-bottom-color:rgba(0,220,255,.12); }
+.list span:last-child { text-shadow:0 0 9px rgba(0,239,255,.35); }
+.foot { text-shadow:0 0 12px rgba(0,180,255,.22); }
+@media(max-width:700px) {
+  .core { width:205px;height:205px; }
+  .reactor-ring.ring-three { inset:-3px; }
+  .panel { box-shadow:0 8px 25px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.03); }
+  .btn { min-height:43px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  *,*:before,*:after { animation-duration:.01ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; transition-duration:.01ms!important; }
+}
+
+
+/* ===== CINEMATIC 3D HOLOGRAPHIC ENGINE ===== */
+:root{--electric:#63f7ff;--ice:#d8ffff;--deep:#03101e}
+body{background:#010711;perspective:1100px}
+#holoCanvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.9}
+.app{z-index:1;transform-style:preserve-3d}
+.layout{perspective:1400px}
+.panel,.core-section{transform-style:preserve-3d;backface-visibility:hidden}
+.panel{border-radius:4px 17px 4px 17px;clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px))}
+.module,.metric{border-radius:3px 11px 3px 11px}
+.core-section{overflow:visible;isolation:isolate}
+.core-section:after{content:"";position:absolute;inset:12px;border:1px solid rgba(0,229,255,.09);clip-path:polygon(0 0,24px 0,24px 1px,1px 1px,1px 24px,0 24px,0 0,100% 0,100% 24px,calc(100% - 1px) 24px,calc(100% - 1px) 1px,calc(100% - 24px) 1px,calc(100% - 24px) 0,100% 0,100% 100%,calc(100% - 24px) 100%,calc(100% - 24px) calc(100% - 1px),calc(100% - 1px) calc(100% - 1px),calc(100% - 1px) calc(100% - 24px),100% calc(100% - 24px),100% 100%,0 100%,0 calc(100% - 24px),1px calc(100% - 24px),1px calc(100% - 1px),24px calc(100% - 1px),24px 100%);pointer-events:none;opacity:.8}
+.core{width:270px;height:270px;perspective:900px;transform-style:preserve-3d;isolation:isolate;background:radial-gradient(circle,rgba(0,235,255,.16),rgba(2,22,42,.92) 48%,#01050b 72%);box-shadow:0 0 35px #00dfff55,0 0 110px #008cff35,inset 0 0 48px #00eaff30;animation:reactorHover 6s ease-in-out infinite,reactorTilt 12s ease-in-out infinite}
+.core:before{inset:2px;border-width:2px;border-top-color:#d7ffff;border-right-color:#087dff;border-bottom-color:#00efff;border-left-color:#075078;box-shadow:0 0 18px #00dfff80,inset 0 0 18px #00bfff44;transform:translateZ(18px)}
+.core:after{inset:16px;border-width:2px;border-top-color:#00efff;border-bottom-color:#168bff;box-shadow:0 0 20px #00bfff55;transform:translateZ(34px)}
+.core-inner{width:102px;height:102px;position:relative;z-index:4;border:5px solid rgba(207,255,255,.7);background:radial-gradient(circle,#fff 0 5%,#cfffff 10%,#00f4ff 25%,#087bdb 47%,#03162b 69%,transparent 72%);box-shadow:0 0 15px #fff,0 0 35px #00eaff,0 0 75px #008cff,0 0 125px #007bff88,inset 0 0 22px #fff;animation:reactorPulse 2.2s ease-in-out infinite}
+.reactor-ring{z-index:3;transform-style:preserve-3d}
+.reactor-ring.ring-one{inset:31px;border:1px dashed rgba(188,255,255,.72);transform:rotateX(66deg) translateZ(42px);animation:orbitA 14s linear infinite}
+.reactor-ring.ring-two{inset:47px;border:2px dotted rgba(22,139,255,.9);transform:rotateY(68deg) translateZ(24px);animation:orbitB 10s linear infinite}
+.reactor-ring.ring-three{inset:-10px;border-width:2px;border-top-color:#fff;border-right-color:#00efff;border-bottom-color:#087bff;transform:rotateX(72deg);animation:orbitC 18s linear infinite}
+.reactor-ring.ring-four{inset:4px;border:1px solid rgba(0,239,255,.4);border-left:3px solid #00efff;border-right:3px solid #168bff;transform:rotateY(72deg);animation:orbitB 7s linear infinite reverse}
+.reactor-ring.ring-five{inset:62px;border:1px solid rgba(255,255,255,.65);border-top:3px solid white;transform:rotateX(72deg) translateZ(55px);animation:orbitA 5s linear infinite reverse}
+.reactor-crosshair{position:absolute;inset:-24px;border-radius:50%;z-index:1;background:repeating-conic-gradient(from 0deg,transparent 0 8deg,rgba(0,230,255,.35) 8.2deg 8.6deg,transparent 9deg 15deg);mask:radial-gradient(circle,transparent 65%,#000 66% 67%,transparent 68%);animation:spin 50s linear infinite}
+.core-glint{position:absolute;inset:0;border-radius:50%;z-index:5;pointer-events:none;background:conic-gradient(from 0deg,transparent 0 68%,rgba(255,255,255,.32) 72%,transparent 76%);mask:radial-gradient(circle,transparent 58%,#000 60% 62%,transparent 64%);animation:spin 4s linear infinite}
+.core-readout{max-width:390px;margin:0 auto 12px;display:flex;justify-content:center;gap:18px;align-items:center;font:9px/1.4 monospace;letter-spacing:2px;color:#74b9d0}
+.core-readout b{color:#cfffff;text-shadow:0 0 12px #00efff;font-size:11px}
+@keyframes reactorHover{0%,100%{translate:0 0}50%{translate:0 -7px}}
+@keyframes reactorTilt{0%,100%{rotateX(0deg) rotateY(-5deg)}50%{rotateX(4deg) rotateY(5deg)}}
+@keyframes orbitA{to{transform:rotateX(66deg) rotateZ(360deg) translateZ(42px)}}
+@keyframes orbitB{to{transform:rotateY(68deg) rotateZ(360deg) translateZ(24px)}}
+@keyframes orbitC{to{transform:rotateX(72deg) rotateZ(360deg)}}
+.core-label{font-size:14px;letter-spacing:6px}
+.header-status{font-family:monospace}
+.panel-title{font-family:monospace;letter-spacing:3px}
+.module strong,.metric strong,.list{font-family:monospace}
+.message{backdrop-filter:blur(12px)}
+.bot{border-left:2px solid #00efff;background:linear-gradient(100deg,rgba(0,239,255,.11),rgba(0,25,50,.25))}
+.user{border-right:2px solid #168bff}
+.btn{font-family:monospace;letter-spacing:1px;border-radius:3px 10px 3px 10px}
+body.ai-thinking .core-inner{animation:thinkingCore .55s ease-in-out infinite alternate;box-shadow:0 0 25px #fff,0 0 65px #00efff,0 0 145px #168bff}
+body.ai-thinking .core{filter:brightness(1.3)}
+body.ai-thinking .core:before{animation-duration:1.1s}
+body.ai-speaking .core-inner{animation:speakingCore .22s ease-in-out infinite alternate}
+body.ai-speaking .core-glint{animation-duration:1.1s}
+body.ai-listening .core{box-shadow:0 0 45px #00efff99,0 0 130px #168bff66,inset 0 0 55px #00eaff55}
+@keyframes thinkingCore{to{transform:scale(1.22);filter:hue-rotate(25deg) brightness(1.8)}}
+@keyframes speakingCore{to{transform:scale(1.14);filter:brightness(1.7)}}
+.boot-screen{position:fixed;inset:0;z-index:99;display:grid;place-content:center;justify-items:center;gap:18px;background:radial-gradient(circle,#062747 0%,#010711 56%,#000 100%);transition:opacity .8s ease,visibility .8s ease}
+.boot-screen.done{opacity:0;visibility:hidden;pointer-events:none}
+.boot-emblem{width:94px;height:94px;border:1px solid #00efff;border-radius:50%;position:relative;display:grid;place-items:center;box-shadow:0 0 35px #00bfff55,inset 0 0 25px #00bfff44;animation:bootSpin 3s linear infinite}
+.boot-emblem:before,.boot-emblem:after{content:"";position:absolute;inset:9px;border:2px dashed #00efff;border-radius:50%}
+.boot-emblem:after{inset:20px;border-style:solid;border-color:#168bff;animation:spin 2s linear infinite reverse}
+.boot-emblem span{width:22px;height:22px;border-radius:50%;background:#dfffff;box-shadow:0 0 12px white,0 0 35px #00efff}
+.boot-title{font:800 22px Arial;letter-spacing:6px;color:#eaffff;text-shadow:0 0 20px #00efff}
+.boot-title b{color:#00efff}
+.boot-line{width:220px;height:2px;background:#12364c;overflow:hidden}
+.boot-line span{display:block;width:45%;height:100%;background:#bfffff;box-shadow:0 0 12px #00efff;animation:bootLoad 2.2s ease forwards}
+.boot-text{font:10px monospace;letter-spacing:3px;color:#65dff3;animation:bootBlink .6s infinite alternate}
+@keyframes bootSpin{to{transform:rotate(360deg)}}
+@keyframes bootLoad{from{transform:translateX(-110%)}to{transform:translateX(240%)}}
+@keyframes bootBlink{to{opacity:.35}}
+@media(max-width:700px){.core{width:220px;height:220px}.core-readout{gap:8px;font-size:8px}.reactor-ring.ring-three{inset:-4px}}
+@media(prefers-reduced-motion:reduce){#holoCanvas{display:none}.boot-screen{display:none}}
+
+</style>
+</head>
+
+<body>
+<canvas id="holoCanvas" aria-hidden="true"></canvas>
+<div class="boot-screen" id="bootScreen" aria-hidden="true">
+  <div class="boot-emblem"><span></span><i></i></div>
+  <div class="boot-title">NOVEX <b>JARVIS</b></div>
+  <div class="boot-line"><span></span></div>
+  <div class="boot-text" id="bootText">INITIALIZING NEURAL INTERFACE</div>
+</div>
+<div class="app">
+<div aria-hidden="true" class="ambient-hud"></div>
+
+<header>
+  <div class="logo">NOVEX JARVIS</div>
+  <div class="header-status" id="headerStatus">SYSTEM ONLINE</div>
+</header>
+
+<div class="layout">
+
+<!-- LEFT PANEL -->
+<aside class="left panel">
+  <div class="panel-title">SYSTEM MODULES</div>
+
+  <div class="module">
+    <strong>01 / ARTIFICIAL INTELLIGENCE</strong>
+    <small id="aiModule">AI CONNECTED</small>
+  </div>
+
+  <div class="module">
+    <strong>02 / VOICE INTERFACE</strong>
+    <small id="voiceModule">VOICE READY</small>
+  </div>
+
+  <div class="module">
+    <strong>03 / MEMORY SYSTEM</strong>
+    <small id="memoryModule">PERSONAL MEMORY ENABLED</small>
+  </div>
+
+  <div class="module">
+    <strong>04 / COMMAND SYSTEM</strong>
+    <small>AWAITING INPUT</small>
+  </div>
+</aside>
+
+<!-- CENTER -->
+<main class="center">
+
+  <section class="core-section">
+    <div class="core">
+      <div class="reactor-ring ring-one"></div>
+      <div class="reactor-ring ring-two"></div>
+      <div class="reactor-ring ring-three"></div>
+      <div class="reactor-ring ring-four"></div>
+      <div class="reactor-ring ring-five"></div>
+      <div class="reactor-crosshair"></div>
+      <div class="core-inner"></div>
+      <div class="core-glint"></div>
+    </div>
+
+    <div class="core-readout"><span>NEURAL LINK</span><b>98.7%</b><span>REACTOR ONLINE</span></div>
+    <div class="core-label">NOVEX AI CORE</div>
+    <div class="core-status" id="status">SYSTEM READY</div>
+
+    <div class="metrics">
+      <div class="metric">
+        <strong id="aiMetric">ONLINE</strong>
+        <span>AI STATUS</span>
+      </div>
+      <div class="metric">
+        <strong id="voiceMetric">READY</strong>
+        <span>VOICE</span>
+      </div>
+      <div class="metric">
+        <strong id="memoryMetric">ACTIVE</strong>
+        <span>MEMORY</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel chat-panel">
+    <div class="panel-title">AI COMMUNICATION</div>
+
+    <div class="chat" id="chat">
+      <div class="message bot">
+        <span class="message-label">NOVEX JARVIS</span>
+        System online. How may I assist you?
+      </div>
+    </div>
+
+    <div class="input-row">
+      <select id="lang">
+        <option value="en-US">English</option>
+        <option value="hi-IN">Hindi</option>
+      </select>
+      <input id="userInput" placeholder="Enter your command..." autocomplete="off">
+      <button class="btn primary" id="sendBtn">SEND</button>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="micBtn">MIC</button>
+      <button class="btn" id="speakBtn">VOICE</button>
+      <button class="btn" id="stopBtn">STOP</button>
+      <button class="btn danger" id="clearBtn">CLEAR</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- RIGHT PANEL -->
+<aside class="right panel">
+  <div class="panel-title">SYSTEM INFORMATION</div>
+
+  <div class="right-grid">
+    <div>
+      <div class="module">
+        <strong>AI NETWORK</strong>
+        <small>Cloud AI Interface</small>
+      </div>
+
+      <div class="module">
+        <strong>SESSION</strong>
+        <small id="sessionStatus">ACTIVE</small>
+      </div>
+
+      <div class="module">
+        <strong>VOICE ENGINE</strong>
+        <small>Browser Speech Engine</small>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel-title">LIVE STATUS</div>
+
+      <div class="list">
+        <span>AI</span><span id="liveAI">ONLINE</span>
+      </div>
+      <div class="list">
+        <span>MIC</span><span id="liveMic">OFF</span>
+      </div>
+      <div class="list">
+        <span>VOICE</span><span id="liveVoice">READY</span>
+      </div>
+      <div class="list">
+        <span>MEMORY</span><span id="liveMemory">ACTIVE</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+</div>
+
+<div class="foot">NOVEX JARVIS • PERSONAL AI SYSTEM</div>
+</div>
+
+<script>
+const AI_ENDPOINT =
+"https://wild-queen-d53d.navedpathan7456.workers.dev/";
+
+const $ = id => document.getElementById(id);
+
+let speechGeneration = 0;
+let lastAIText = "";
+let recognition = null;
+let listening = false;
+
+let memoryId = localStorage.getItem("novex_memory_id");
+
+if (!memoryId) {
+  memoryId = (crypto.randomUUID)
+    ? crypto.randomUUID()
+    : "novex-" + Date.now() + "-" + Math.random();
+
+  localStorage.setItem("novex_memory_id", memoryId);
+}
+
+function setStatus(text){
+  $("status").textContent = text;
+  $("headerStatus").textContent = text;
+}
+
+function addMessage(text, type){
+  const div = document.createElement("div");
+  div.className = "message " + type;
+
+  const label = document.createElement("span");
+  label.className = "message-label";
+  label.textContent = type === "user" ? "YOU" : "NOVEX JARVIS";
+
+  div.appendChild(label);
+
+  const content = document.createElement("div");
+  content.textContent = text;
+  div.appendChild(content);
+
+  $("chat").appendChild(div);
+  $("chat").scrollTop = $("chat").scrollHeight;
+}
+
+function speak(text) {
+  if (!text || !("speechSynthesis" in window)) {
+    setStatus("VOICE NOT AVAILABLE");
+    return;
+  }
+
+  speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  const selectedLang = $("lang").value || "en-US";
+
+  utterance.lang = selectedLang;
+  utterance.rate = 0.90;
+  utterance.pitch = 0.82;
+  utterance.volume = 1;
+
+  const voices = speechSynthesis.getVoices();
+
+  const language = selectedLang.split("-")[0].toLowerCase();
+
+  const matchingVoices = voices.filter(voice =>
+    voice.lang.toLowerCase().startsWith(language)
+  );
+
+  const preferredVoice = matchingVoices.find(voice =>
+    /natural|enhanced/i.test(voice.name)
+  );
+
+  if (preferredVoice) {
+    utterance.voice = preferredVoice;
+  } else if (matchingVoices.length > 0) {
+    utterance.voice = matchingVoices[0];
+  }
+
+  utterance.onstart = () => {
+    setStatus("JARVIS SPEAKING...");
+    $("voiceMetric").textContent = "ACTIVE";
+    $("liveVoice").textContent = "ACTIVE";
+  };
+
+  utterance.onend = () => {
+    setStatus("SYSTEM READY");
+    $("voiceMetric").textContent = "READY";
+    $("liveVoice").textContent = "READY";
+  };
+
+  utterance.onerror = () => {
+    setStatus("VOICE ERROR");
+  };
+
+  speechSynthesis.speak(utterance);
+}
+
+async function askJarvis(message){
+  if(!message.trim()) return;
+
+  setStatus("PROCESSING COMMAND");
+  $("aiMetric").textContent = "BUSY";
+  $("liveAI").textContent = "BUSY";
+
+  try{
+    const response = await fetch(AI_ENDPOINT,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        message:message,
+        language:$("lang").value,
+        memoryId:memoryId
+      })
+    });
+
+    if(!response.ok){
+      throw new Error("Server error " + response.status);
+    }
+
+    const data = await response.json();
+
+    const reply = data.response ||
+                  data.reply ||
+                  data.message ||
+                  data.text ||
+                  "I received your command.";
+
+    addMessage(reply,"bot");
+    lastAIText = reply;
+
+    $("aiMetric").textContent = "ONLINE";
+    $("liveAI").textContent = "ONLINE";
+    $("aiModule").textContent = "AI CONNECTED";
+
+    setStatus("SYSTEM READY");
+
+    speak(reply);
+
+  }catch(error){
+    console.error(error);
+
+    const errorText =
+      "Connection error. Please check your internet connection and try again.";
+
+    addMessage(errorText,"bot");
+
+    $("aiMetric").textContent = "ERROR";
+    $("liveAI").textContent = "ERROR";
+    setStatus("CONNECTION ERROR");
+  }
+}
+
+function sendTypedMessage(){
+  const input = $("userInput");
+  const message = input.value.trim();
+
+  if(!message) return;
+
+  input.value = "";
+  addMessage(message,"user");
+  askJarvis(message);
+}
+
+$("sendBtn").onclick = sendTypedMessage;
+
+$("userInput").addEventListener("keydown",e=>{
+  if(e.key === "Enter") sendTypedMessage();
+});
+
+$("speakBtn").onclick = ()=>{
+  if(lastAIText) speak(lastAIText);
+  else setStatus("NO VOICE MESSAGE");
+};
+
+$("stopBtn").onclick = ()=>{
+  speechGeneration++;
+  speechSynthesis.cancel();
+
+  if(recognition && listening){
+    recognition.stop();
+  }
+
+  setStatus("SYSTEM READY");
+  $("voiceMetric").textContent = "READY";
+  $("liveVoice").textContent = "READY";
+};
+
+$("clearBtn").onclick = ()=>{
+  $("chat").innerHTML = "";
+  lastAIText = "";
+
+  addMessage("Conversation cleared. System ready.","bot");
+  setStatus("SYSTEM READY");
+};
+
+const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+if(SpeechRecognition){
+  recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = ()=>{
+    listening = true;
+    $("micBtn").textContent = "LISTENING...";
+    $("liveMic").textContent = "ON";
+    $("voiceModule").textContent = "LISTENING";
+    $("voiceMetric").textContent = "ACTIVE";
+    setStatus("LISTENING");
+  };
+
+  recognition.onresult = event=>{
+    const transcript =
+      event.results[event.results.length-1][0].transcript;
+
+    $("userInput").value = transcript;
+    sendTypedMessage();
+  };
+
+  recognition.onerror = event=>{
+    console.log("Mic error:",event.error);
+    setStatus("MIC ERROR");
+  };
+
+  recognition.onend = ()=>{
+    listening = false;
+    $("micBtn").textContent = "MIC";
+    $("liveMic").textContent = "OFF";
+    $("voiceModule").textContent = "VOICE READY";
+    $("voiceMetric").textContent = "READY";
+  };
+
+  $("micBtn").onclick = ()=>{
+    if(listening){
+      recognition.stop();
+      return;
+    }
+
+    recognition.lang = $("lang").value;
+    recognition.start();
+  };
+
+}else{
+  $("micBtn").onclick = ()=>{
+    addMessage("Speech recognition is not supported in this browser. Try Chrome.","bot");
+  };
+}
+
+$("lang").onchange = ()=>{
+  if(recognition) recognition.lang = $("lang").value;
+};
+
+setStatus("SYSTEM READY");
+</script>
+
+
+<script>
+/* NOVEX visual engine: independent of AI, memory, and voice request logic. */
+(()=>{
+ const canvas=document.getElementById('holoCanvas');
+ const ctx=canvas.getContext('2d');
+ const boot=document.getElementById('bootScreen');
+ const status=document.getElementById('status');
+ const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ let w=0,h=0,dpr=1,particles=[],tick=0;
+ function resize(){
+   dpr=Math.min(window.devicePixelRatio||1,2);w=innerWidth;h=innerHeight;
+   canvas.width=Math.floor(w*dpr);canvas.height=Math.floor(h*dpr);
+   canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);
+   const count=Math.min(125,Math.max(45,Math.floor(w*h/11500)));
+   particles=Array.from({length:count},()=>({x:Math.random()*w,y:Math.random()*h,z:.25+Math.random()*.85,r:.5+Math.random()*1.5,v:.12+Math.random()*.42,phase:Math.random()*6.28}));
+ }
+ function draw(){
+   if(reduced)return;
+   tick+=.006;ctx.clearRect(0,0,w,h);
+   const cx=w/2,cy=h*.39;
+   // perspective star field and subtle motion trails
+   for(const p of particles){
+     p.y-=p.v*p.z;if(p.y< -5){p.y=h+5;p.x=Math.random()*w}
+     p.x+=Math.sin(tick+p.phase)*.13;
+     const a=.18+.45*(.5+.5*Math.sin(tick*2+p.phase));
+     ctx.beginPath();ctx.fillStyle=`rgba(92,226,255,${a})`;ctx.arc(p.x,p.y,p.r*p.z,0,Math.PI*2);ctx.fill();
+   }
+   // central radial holographic radar
+   const radius=Math.min(w*.29,250);
+   ctx.save();ctx.translate(cx,cy);
+   for(let i=0;i<4;i++){
+     const r=radius*(.48+i*.17);
+     ctx.beginPath();ctx.strokeStyle=`rgba(0,210,255,${.12-i*.018})`;ctx.lineWidth=1;
+     ctx.setLineDash(i%2?[3,9]:[1,13]);ctx.arc(0,0,r,0,Math.PI*2);ctx.stroke();
+   }
+   ctx.setLineDash([]);
+   const sweep=tick*1.8;
+   const grad=ctx.createConicGradient(sweep,0,0);grad.addColorStop(0,'rgba(0,238,255,0)');grad.addColorStop(.08,'rgba(0,238,255,.13)');grad.addColorStop(.14,'rgba(0,238,255,0)');grad.addColorStop(1,'rgba(0,238,255,0)');
+   ctx.fillStyle=grad;ctx.beginPath();ctx.arc(0,0,radius,0,Math.PI*2);ctx.fill();
+   // corner telemetry ticks
+   ctx.strokeStyle='rgba(61,222,255,.32)';ctx.lineWidth=1;
+   for(let i=0;i<72;i++){const a=i*Math.PI/36;const r1=radius*.82,r2=radius*(i%6===0?.9:.855);ctx.beginPath();ctx.moveTo(Math.cos(a)*r1,Math.sin(a)*r1);ctx.lineTo(Math.cos(a)*r2,Math.sin(a)*r2);ctx.stroke()}
+   ctx.restore();
+   requestAnimationFrame(draw);
+ }
+ resize();addEventListener('resize',resize,{passive:true});draw();
+ if(boot){setTimeout(()=>boot.classList.add('done'),2550);setTimeout(()=>boot.remove(),3500)}
+ if(status){
+   const update=()=>{
+     const t=(status.textContent||'').toUpperCase();
+     document.body.classList.toggle('ai-thinking',/PROCESSING|THINKING/.test(t));
+     document.body.classList.toggle('ai-listening',/LISTENING/.test(t));
+     document.body.classList.toggle('ai-speaking',/SPEAKING/.test(t));
+   };
+   new MutationObserver(update).observe(status,{childList:true,characterData:true,subtree:true});update();
+ }
+})();
+</script>
+
+<style>
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.chip{border:1px solid var(--border);border-radius:3px 10px 3px 10px;background:rgba(0,150,255,.08);color:var(--muted);padding:7px 10px;font:10px monospace;letter-spacing:1px;transition:.2s}
+.chip:hover{color:var(--cyan);border-color:var(--cyan)}
+.btn.on{background:rgba(57,255,189,.16);color:#39ffbd;border-color:#39ffbd88}
+.msg-link{display:inline-block;margin:8px 6px 0 0;color:var(--cyan);border:1px solid var(--border);padding:6px 10px;border-radius:8px;text-decoration:none;font-size:12px}
+</style>
+<script>
+/* NOVEX JARVIS BRAIN: local skills + wake word + AI fallback */
+(()=>{
+const hi=()=>$("lang").value==="hi-IN",L=(e,h)=>hi()?h:e,U=encodeURIComponent;
+const store={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+function reply(text,link,spoken){
+  addMessage(text,"bot");
+  if(link){const a=document.createElement("a");a.className="msg-link";a.href=link;a.target="_blank";a.rel="noopener";a.textContent="OPEN ↗";$("chat").lastChild.appendChild(a);$("chat").scrollTop=$("chat").scrollHeight}
+  lastAIText=spoken||text;speak(spoken||text);setStatus("SYSTEM READY");
+}
+function go(url,msg){const w=window.open(url,"_blank");if(w)try{w.opener=null}catch{}reply(msg,w?null:url)}
+const pos=()=>new Promise((ok,no)=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>ok(p.coords),no,{timeout:8000}):no());
+const fmt=s=>{const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return[h&&h+" hour"+(h>1?"s":""),m&&m+" min",x&&x+" sec"].filter(Boolean).join(" ")};
+const wx=c=>c==0?"clear sky":c<4?"partly cloudy":c<50?"foggy":c<60?"drizzle":c<70?"rain":c<80?"snow":c<86?"rain showers":"thunderstorm";
+const SITES={youtube:"https://www.youtube.com",google:"https://www.google.com",whatsapp:"https://web.whatsapp.com",instagram:"https://www.instagram.com",facebook:"https://www.facebook.com",gmail:"https://mail.google.com",maps:"https://maps.google.com",github:"https://github.com",twitter:"https://x.com",chatgpt:"https://chatgpt.com",spotify:"https://open.spotify.com",amazon:"https://www.amazon.in",flipkart:"https://www.flipkart.com",telegram:"https://web.telegram.org",linkedin:"https://www.linkedin.com",netflix:"https://www.netflix.com",news:"https://news.google.com",drive:"https://drive.google.com",calendar:"https://calendar.google.com"};
+const ALIAS={"यूट्यूब":"youtube","गूगल":"google","व्हाट्सएप":"whatsapp","इंस्टाग्राम":"instagram","फेसबुक":"facebook","जीमेल":"gmail","मैप्स":"maps","न्यूज़":"news"};
+const siteIn=t=>{for(const k in SITES)if(t.includes(k))return k;for(const k in ALIAS)if(t.includes(k))return ALIAS[k]};
+const HELP="• open youtube / whatsapp / gmail…\n• search <topic>  ·  play <song>\n• weather  ·  weather in <city>\n• timer 5 minutes  ·  remind me in 10 minutes to <task>\n• note <text>  ·  show notes\n• calculate 25 percent of 480\n• directions to <place>  ·  pizza near me  ·  where am I\n• call <number>  ·  whatsapp <number> <message>\n• WAKE button → say “Jarvis …” hands-free\n• anything else → AI brain";
+
+/* ---- reminders (persist across reloads) ---- */
+let rem=store.get("nx_rem",[]);const hd={};
+function beep(){try{const a=new(window.AudioContext||window.webkitAudioContext)();[0,.35,.7].forEach(d=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=880;o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.15,a.currentTime+d);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+d+.3);o.start(a.currentTime+d);o.stop(a.currentTime+d+.3)})}catch{}}
+function fire(r){beep();const t=r.task?L("Reminder: ","याद दिलाना: ")+r.task:L("Time is up, sir.","समय पूरा हुआ।");reply(t);try{if(Notification.permission==="granted")new Notification("NOVEX JARVIS",{body:t})}catch{}rem=rem.filter(x=>x.id!==r.id);store.set("nx_rem",rem)}
+const arm=r=>{hd[r.id]=setTimeout(()=>fire(r),Math.max(0,r.at-Date.now()))};
+rem.forEach(arm);
+
+async function weather(city){
+  setStatus("FETCHING WEATHER");
+  try{
+    let lat,lon,name;
+    if(city){const g=await(await fetch("https://geocoding-api.open-meteo.com/v1/search?count=1&name="+U(city))).json(),r=g.results&&g.results[0];if(!r){reply(L("I couldn't find "+city+".",city+" नहीं मिला।"));return}lat=r.latitude;lon=r.longitude;name=r.name}
+    else{try{const c=await pos();lat=c.latitude;lon=c.longitude;name=L("Your location","आपकी लोकेशन")}catch{reply(L("I need location access. Allow it, or ask: weather in Delhi.","लोकेशन की अनुमति दें, या कहें: दिल्ली का मौसम।"));return}}
+    const d=await(await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=1`)).json(),c=d.current,y=d.daily;
+    const T=Math.round(c.temperature_2m),F=Math.round(c.apparent_temperature),mn=Math.round(y.temperature_2m_min[0]),mx=Math.round(y.temperature_2m_max[0]),p=y.precipitation_probability_max[0];
+    reply(L(`${name}: ${wx(c.weather_code)}, ${T}°C (feels like ${F}°C). Humidity ${c.relative_humidity_2m}%, wind ${Math.round(c.wind_speed_10m)} km/h. Today ${mn} to ${mx}°C, rain chance ${p}%.`,`${name}: तापमान ${T} डिग्री, महसूस ${F} डिग्री। नमी ${c.relative_humidity_2m} प्रतिशत। आज ${mn} से ${mx} डिग्री, बारिश की संभावना ${p} प्रतिशत।`));
+  }catch{reply(L("I couldn't fetch the weather right now.","अभी मौसम की जानकारी नहीं मिल पाई।"))}
+}
+
+async function route(raw){
+  const R=raw.trim().replace(/[?!।.]+$/,""),t=R.toLowerCase(),now=new Date(),loc=hi()?"hi-IN":"en-IN";let m;
+  if(/^(stop|quiet|shut up|chup|ruko)( jarvis)?$|^(रुको|चुप)$/.test(t)){$("stopBtn").click();return true}
+  if(/^(clear|delete) (the )?chat$/.test(t)){$("clearBtn").click();return true}
+  if(/^(go to sleep|stop listening|sleep mode|so jao)/.test(t)){setWake(false);reply(L("Going to sleep. Press WAKE to bring me back.","ठीक है, मैं सो रहा हूँ।"));return true}
+  if(/^(hi|hello|hey|namaste|नमस्ते|good (morning|afternoon|evening))( jarvis)?$/.test(t)){const h=now.getHours();reply(L(`Good ${h<12?"morning":h<17?"afternoon":"evening"}, sir. All systems are online.`,"नमस्ते सर, सभी सिस्टम ऑनलाइन हैं। बताइए, क्या करना है?"));return true}
+  if(/^(help|commands|what can you do|tum kya kar sakte ho|madad)|मदद/.test(t)){reply(HELP,null,L("I can open sites, search, play YouTube, check weather, set timers and reminders, take notes, calculate, navigate, call, message on WhatsApp, and answer anything else.","मैं वेबसाइट, सर्च, यूट्यूब, मौसम, टाइमर, रिमाइंडर, नोट्स, कैलकुलेशन, रास्ता और बाकी हर सवाल में मदद कर सकता हूँ।"));return true}
+  if(/(?:switch|change|set) (?:to )?hindi|hindi (?:mode|me|mein) (?:baat|bol)|हिंदी में बात/.test(t)){$("lang").value="hi-IN";$("lang").onchange();reply("ठीक है, अब हिंदी में बात करेंगे।");return true}
+  if(/(?:switch|change|set) (?:to )?english|english (?:mode|me|mein) (?:baat|bol)/.test(t)){$("lang").value="en-US";$("lang").onchange();reply("Alright, switching to English.");return true}
+  const notes=store.get("nx_notes",[]);
+  if(/^(system )?(status|diagnostics?)$/.test(t)){reply(`NETWORK: ${navigator.onLine?"ONLINE":"OFFLINE"}\nLANGUAGE: ${$("lang").value}\nWAKE MODE: ${wakeOn?"ON":"OFF"}\nNOTES: ${notes.length}\nACTIVE REMINDERS: ${rem.length}\nTIME: ${now.toLocaleTimeString(loc)}`,null,L("All systems are operational, sir.","सभी सिस्टम ठीक चल रहे हैं।"));return true}
+
+  /* timers & reminders */
+  if(/(cancel|clear|delete|remove|stop|hatao|band).*(timers?|alarms?|reminders?)/.test(t)){rem.forEach(r=>clearTimeout(hd[r.id]));rem=[];store.set("nx_rem",rem);reply(L("All timers and reminders cancelled.","सभी टाइमर रद्द कर दिए।"));return true}
+  const dm=R.match(/(\d+(?:\.\d+)?)\s*(seconds?|secs?|minutes?|mins?|hours?|hrs?|ghant[ae]|सेकंड|सेकण्ड|मिनट|घंटे|घंटा)/i);
+  if(dm&&/timer|alarm|remind|yaad|baad|after|in \d|टाइमर|अलार्म|याद|बाद/i.test(t)){
+    const u=dm[2].toLowerCase(),sec=Math.round(parseFloat(dm[1])*(/^(h|ghan|घं)/.test(u)?3600:/^(m|मि)/.test(u)?60:1));
+    if(sec<1||sec>86400){reply(L("I can set timers from 1 second to 24 hours.","मैं 1 सेकंड से 24 घंटे तक का टाइमर लगा सकता हूँ।"));return true}
+    const task=R.replace(dm[0],"").replace(/\b(set|a|an|the|timer|alarm|for|in|after|remind me|remind|reminder|to|please|me|baad|yaad dilao|yaad dila do|yaad dilana|karo|kar do|jarvis)\b/gi,"").replace(/(टाइमर|अलार्म|याद|दिलाओ|बाद|करो)/g,"").replace(/\s+/g," ").trim();
+    const r={id:Date.now(),at:Date.now()+sec*1e3,task};rem.push(r);store.set("nx_rem",rem);arm(r);
+    try{if(Notification.permission==="default")Notification.requestPermission()}catch{}
+    reply(task?L(`Done. I'll remind you to ${task} in ${fmt(sec)}.`,`ठीक है, ${fmt(sec)} बाद याद दिलाऊँगा: ${task}`):L(`Timer set for ${fmt(sec)}.`,`${fmt(sec)} का टाइमर लग गया।`));return true;
+  }
+
+  /* time, date, weather, battery */
+  if(/(what'?s the time|what is the time|current time|time now|time is it|kitne baje|samay|time kya)|कितने बजे|समय|टाइम क्या|^time$/.test(t)){const s=now.toLocaleTimeString(loc,{hour:"numeric",minute:"2-digit"});reply(L(`It is ${s}, sir.`,`अभी ${s} हुए हैं।`));return true}
+  if(/(today'?s date|date today|what'?s the date|what is the date|what day|aaj (ki )?(date|tarikh)|tarikh|aaj kaun sa din)|तारीख|कौन सा दिन/.test(t)){reply(L("Today is ","आज ")+now.toLocaleDateString(loc,{weekday:"long",day:"numeric",month:"long",year:"numeric"}));return true}
+  if(/weather|mausam|मौसम|temperature|tapman|तापमान/.test(t)){const a=R.match(/(?:weather|mausam|मौसम|temperature)\s+(?:in|of|at|for|me|mein|में)\s+(.+)/i),b=R.match(/^(.+?)\s+(?:ka|ki|का|की)\s+(?:weather|mausam|मौसम|temperature)/i);let c=(a&&a[1])||(b&&b[1])||"";if(/^(aaj|abhi|today|now|current|यहाँ|यहां|आज|अभी)$/i.test(c.trim()))c="";await weather(c.trim());return true}
+  if(/battery|बैटरी/.test(t)){if(!navigator.getBattery){reply(L("Battery status isn't available in this browser.","इस ब्राउज़र में बैटरी जानकारी उपलब्ध नहीं।"));return true}const b=await navigator.getBattery(),p=Math.round(b.level*100);reply(L(`Battery is at ${p} percent${b.charging?" and charging":""}.`,`बैटरी ${p} प्रतिशत है${b.charging?", चार्ज हो रही है":""}।`));return true}
+
+  /* notes */
+  if(/(clear|delete|erase|hatao|mitao).*(notes?|नोट)/.test(t)){store.set("nx_notes",[]);reply(L("All notes deleted.","सभी नोट्स हटा दिए।"));return true}
+  if(m=R.match(/^(?:note down|note|remember|take a note|save note|add note|नोट|याद रखो)(?:\s*:\s*|\s+)(?:that\s+)?(.+)$/i)||R.match(/^(.+?)\s+(?:note karo|likh lo|likh do|yaad rakho|नोट करो)$/i)){notes.push({t:m[1],d:Date.now()});store.set("nx_notes",notes);reply(L("Noted: ","नोट कर लिया: ")+m[1]);return true}
+  if(/\bnotes?\b|नोट्स/.test(t)&&/(show|read|list|my|mere|dikhao|padho|sunao|दिखाओ|सुनाओ)|^notes?$/.test(t)){reply(notes.length?notes.slice(-8).map((n,i)=>`${i+1}. ${n.t}`).join("\n"):L("You have no notes yet.","अभी कोई नोट नहीं है।"),null,notes.length?notes.slice(-5).map(n=>n.t).join(". "):null);return true}
+
+  /* calculator */
+  const e=t.replace(/^(?:calculate|compute|what is|what's|whats|how much is|solve)\s+/,"").replace(/\s*(?:kitna hota hai|kitne hote hain|equals?)$/,"").replace(/(\d),(?=\d{3})/g,"$1").replace(/(\d+(?:\.\d+)?)\s*(?:%|percent|percentage)\s*of\s*(\d+(?:\.\d+)?)/g,"($1/100*$2)").replace(/\b(plus|add|jod)\b/g,"+").replace(/\b(minus|subtract|ghata)\b/g,"-").replace(/\b(times|multiplied by|into|gunaa|guna|x)\b/g,"*").replace(/\b(divided by|divide|by|bhaag)\b/g,"/").replace(/\^|\bpower\b/g,"**");
+  if(/^[\d+\-*/().\s]+$/.test(e)&&/\d\s*[-+*/]\s*\(?\d|\*\*/.test(e)&&e.length<80){try{const v=Function('"use strict";return('+e+')')();if(Number.isFinite(v)){const s=+v.toFixed(6);reply(`${e.replace(/\*\*/g,"^")} = ${s}`,null,L(`The answer is ${s}`,`उत्तर है ${s}`));return true}}catch{}}
+
+  /* phone, whatsapp, maps */
+  if(m=R.match(/whatsapp\s+(\+?\d[\d\s-]{7,14})(?:\s+(?:message|msg|saying|that|bolo)?\s*(.+))?$/i)){let n=m[1].replace(/\D/g,"");if(n.length===10)n="91"+n;go(`https://wa.me/${n}`+(m[2]?`?text=${U(m[2])}`:""),L("Opening WhatsApp chat.","व्हाट्सएप खोल रहा हूँ।"));return true}
+  if(m=R.match(/(?:call|dial|phone)\s+(\+?\d[\d\s-]{6,14})/i)){reply(L("Dialling now.","कॉल लगा रहा हूँ।"));location.href="tel:"+m[1].replace(/[^\d+]/g,"");return true}
+  if(m=R.match(/(?:directions? to|navigate to|route to|take me to|how to reach|how do i get to)\s+(.+)/i)||R.match(/^(.+?)\s+(?:ka rasta|ka route|tak ka rasta|kaise jaun|kaise pahunchu)/i)){go(`https://www.google.com/maps/dir/?api=1&destination=${U(m[1])}`,L("Plotting the route to "+m[1]+".",m[1]+" का रास्ता खोल रहा हूँ।"));return true}
+  if(m=R.match(/^(.+?)\s+(?:near me|nearby|near by|mere paas|aas paas)$/i)){go(`https://www.google.com/maps/search/${U(m[1]+" near me")}`,L(`Searching ${m[1]} near you.`,`आपके पास ${m[1]} खोज रहा हूँ।`));return true}
+  if(/where am i|my location|meri location|kahan hu|kahan hoon|मैं कहाँ हूँ|मेरी लोकेशन/.test(t)){try{const c=await pos();go(`https://www.google.com/maps?q=${c.latitude},${c.longitude}`,L("Here is your current location.","यह आपकी वर्तमान लोकेशन है।"))}catch{reply(L("I couldn't access your location. Please allow location permission.","लोकेशन नहीं मिली। कृपया अनुमति दें।"))}return true}
+
+  /* open / youtube / search */
+  const s=siteIn(t);
+  if(/\b(open|launch|go to|start)\b|khol|chalu|खोल|चालू/.test(t)){
+    if(s){go(SITES[s],L("Opening "+s+".",s+" खोल रहा हूँ।"));return true}
+    if(m=R.match(/((?:https?:\/\/)?[\w-]+(?:\.[\w-]+)*\.[a-z]{2,}(?:\/\S*)?)/i)){go(/^https?:/.test(m[1])?m[1]:"https://"+m[1],L("Opening "+m[1]+".",m[1]+" खोल रहा हूँ।"));return true}
+  }
+  if(m=R.match(/^(?:play|youtube pe|youtube par|यूट्यूब पर)\s+(.+?)(?:\s+on youtube)?$/i)||R.match(/^(.+?)\s+(?:chalao|bajao|laga do|lagao|play karo|चलाओ|बजाओ)$/i)){go("https://www.youtube.com/results?search_query="+U(m[1]),L("Opening YouTube results for "+m[1]+".","यूट्यूब पर "+m[1]+" खोल रहा हूँ।"));return true}
+  if(m=R.match(/^(?:search|google|look up|search for)\s+(?:for\s+)?(.+)$/i)||R.match(/^(.+?)\s+(?:search karo|search kar do|search kar|dhundo|dhoondo|khojo|सर्च करो|खोजो)$/i)||R.match(/^(?:सर्च|खोजो)\s+(.+)$/i)){go("https://www.google.com/search?q="+U(m[1]),L("Searching Google for "+m[1]+".",m[1]+" गूगल पर खोज रहा हूँ।"));return true}
+
+  /* small utilities */
+  if(/(flip|toss).*coin|sikka|सिक्का/.test(t)){reply(Math.random()<.5?L("Heads.","चित।"):L("Tails.","पट।"));return true}
+  if(/\bdice\b|पासा/.test(t)){reply(L("You rolled a ","पासे पर आया: ")+(1+Math.floor(Math.random()*6)));return true}
+  if(/full ?screen/.test(t)){try{await document.documentElement.requestFullscreen();reply(L("Fullscreen on.","फुलस्क्रीन चालू।"))}catch{reply(L("Fullscreen was blocked.","फुलस्क्रीन नहीं हो पाई।"))}return true}
+  if(/^copy (that|this|it|reply)/.test(t)){try{await navigator.clipboard.writeText(lastAIText);reply(L("Copied.","कॉपी हो गया।"))}catch{reply(L("Copy was blocked by the browser.","ब्राउज़र ने कॉपी रोक दी।"))}return true}
+  return false;
+}
+
+/* ---- AI fallback ---- */
+async function ai(message){
+  setStatus("PROCESSING COMMAND");$("aiMetric").textContent="BUSY";$("liveAI").textContent="BUSY";
+  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),30000);
+  try{
+    const r=await fetch(AI_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},signal:ctl.signal,body:JSON.stringify({message,language:$("lang").value,memoryId,context:{now:new Date().toString(),timezone:Intl.DateTimeFormat().resolvedOptions().timeZone}})});
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    const d=await r.json(),text=d.response||d.reply||d.message||d.text||"I received your command.";
+    $("aiMetric").textContent=$("liveAI").textContent="ONLINE";$("aiModule").textContent="AI CONNECTED";
+    reply(text);
+  }catch(err){
+    console.error(err);
+    const msg=!navigator.onLine?"You appear to be offline. Local commands still work.":err.name==="AbortError"?"The AI took too long to respond. Please try again.":"AI server error ("+err.message+"). Local commands still work.";
+    $("aiMetric").textContent=$("liveAI").textContent="ERROR";addMessage(msg,"bot");setStatus("CONNECTION ERROR");
+  }finally{clearTimeout(to)}
+}
+window.askJarvis=async function(message){
+  if(!message||!message.trim())return;
+  try{if(await route(message))return}catch(e){console.error(e);reply(L("Something went wrong with that command.","इस कमांड में कुछ गड़बड़ हुई।"));return}
+  await ai(message);
+};
+const run=txt=>{addMessage(txt,"user");askJarvis(txt)};
+
+/* ---- wake word: say "Jarvis, <command>" ---- */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let wake=null,wakeOn=false,wakeRun=false,armedUntil=0;
+const wakeBtn=document.createElement("button");wakeBtn.className="btn";wakeBtn.id="wakeBtn";wakeBtn.textContent="WAKE";
+$("micBtn").after(wakeBtn);
+const WAKE_RE=/jarvis|jarvish|jarwis|jarvas|jarvice|जार्विस|जारविस|जरविस/i;
+function heard(raw){
+  const m=raw.match(WAKE_RE);
+  if(m){
+    const after=raw.slice(m.index+m[0].length).replace(/^[\s,.:!-]+/,""),before=raw.slice(0,m.index).replace(/[\s,.:!-]+$/,"").replace(/^(hey|hi|ok|okay|hello)$/i,"");
+    const cmd=after||before;
+    if(cmd)run(cmd);else{armedUntil=Date.now()+10000;reply(L("Yes, sir?","जी, बताइए?"))}
+  }else if(Date.now()<armedUntil){armedUntil=0;run(raw)}
+}
+function mkWake(){
+  wake=new SR();wake.continuous=true;wake.interimResults=false;
+  wake.onstart=()=>{wakeRun=true};wake.onend=()=>{wakeRun=false};
+  wake.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){setWake(false);reply("Microphone permission was denied.")}};
+  wake.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)heard(e.results[i][0].transcript.trim())};
+}
+function setWake(on){
+  if(on&&!SR){reply("Speech recognition isn't supported here. Please use Chrome or Edge.");return}
+  wakeOn=on;wakeBtn.classList.toggle("on",on);wakeBtn.textContent=on?"WAKE: ON":"WAKE";$("liveMic").textContent=on?"WAKE":"OFF";
+  if(on){if(!wake)mkWake();reply(L("Wake mode on. Say Jarvis, then your command.","वेक मोड चालू। जार्विस बोलकर कमांड दें।"))}
+  else{try{wake&&wake.stop()}catch{}}
+}
+wakeBtn.onclick=()=>setWake(!wakeOn);
+setInterval(()=>{
+  if(!wakeOn||listening)return;
+  const talking=speechSynthesis.speaking;
+  if(talking&&wakeRun){try{wake.stop()}catch{}}
+  else if(!talking&&!wakeRun){try{wake.lang=$("lang").value;wake.start()}catch{}}
+},700);
+const oldMic=$("micBtn").onclick;
+$("micBtn").onclick=()=>{if(wakeOn){setWake(false);setTimeout(oldMic,400)}else oldMic()};
+
+/* ---- quick chips ---- */
+const chips=document.createElement("div");chips.className="chips";
+["Help","What time is it","Weather","Set timer 5 minutes","Show notes","Status"].forEach(c=>{const b=document.createElement("button");b.className="chip";b.textContent=c.toUpperCase();b.onclick=()=>run(c);chips.appendChild(b)});
+document.querySelector(".controls").after(chips);
+const gc=document.createElement("button");gc.className="chip";gc.textContent="CONNECT GOOGLE";gc.onclick=()=>window.open(AI_ENDPOINT.replace(/\/?$/,"/")+"auth/google?memoryId="+encodeURIComponent(memoryId),"_blank");chips.appendChild(gc);
+})();
+</script>
+
+</body>
+</html>
