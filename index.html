@@ -410,6 +410,14 @@ body.ai-listening .core{box-shadow:0 0 45px #00efff99,0 0 130px #168bff66,inset 
 @media(prefers-reduced-motion:reduce){#holoCanvas{display:none}.boot-screen{display:none}}
 
 </style>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#02060d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JARVIS">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 </head>
 
 <body>
@@ -1209,6 +1217,55 @@ f.onsubmit=async ev=>{
 if(valid()){ov.hidden=true}else show();
 const lo=document.createElement("button");lo.className="chip";lo.textContent="LOGOUT";lo.onclick=()=>jvLogout(false);
 const ch=document.querySelector(".chips");if(ch)ch.appendChild(lo);
+})();
+</script>
+
+<script>
+/* PWA install + MORNING BRIEFING */
+(()=>{
+if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+const hi=()=>$("lang").value==="hi-IN",L=(e,h)=>hi()?h:e;
+const gj=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch{return d}};
+const WX=c=>c==0?"clear sky":c<4?"partly cloudy":c<50?"foggy":c<60?"drizzle":c<70?"rain":c<80?"snow":c<86?"rain showers":"thunderstorm";
+const hm=(d,loc)=>new Date(d).toLocaleTimeString(loc,{hour:"numeric",minute:"2-digit"});
+async function wx(){
+  try{
+    let lat,lon,name="";
+    const fc=gj("nx_facts",[]).map(f=>(String(f).match(/(?:i live in|my city is)\s+(.+)/i)||[])[1]).filter(Boolean).pop();
+    if(fc){const g=await(await fetch("https://geocoding-api.open-meteo.com/v1/search?count=1&name="+encodeURIComponent(fc))).json(),r=g.results&&g.results[0];if(r){lat=r.latitude;lon=r.longitude;name=r.name}}
+    if(lat==null){const p=await new Promise((ok,no)=>navigator.geolocation?navigator.geolocation.getCurrentPosition(q=>ok(q.coords),no,{timeout:8000}):no());lat=p.latitude;lon=p.longitude}
+    const d=await(await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=1`)).json(),c=d.current,y=d.daily;
+    const T=Math.round(c.temperature_2m),mn=Math.round(y.temperature_2m_min[0]),mx=Math.round(y.temperature_2m_max[0]),p=y.precipitation_probability_max[0];
+    return L(`Weather${name?" in "+name:""}: ${WX(c.weather_code)}, ${T}°C now. Today ${mn} to ${mx}°C, rain chance ${p}%.`,`मौसम${name?" "+name:""}: अभी ${T} डिग्री। आज ${mn} से ${mx} डिग्री, बारिश की संभावना ${p} प्रतिशत।`);
+  }catch{return L("Weather is unavailable right now.","अभी मौसम की जानकारी नहीं मिली।")}
+}
+async function brief(){
+  setStatus("PREPARING BRIEFING");
+  const now=new Date(),loc=hi()?"hi-IN":"en-IN",h=now.getHours();
+  const nm=gj("nx_facts",[]).map(f=>(String(f).match(/(?:my name is|mera naam|मेरा नाम)\s+([^\s]+)/i)||[])[1]).filter(Boolean).pop();
+  const greet=L(`Good ${h<12?"morning":h<17?"afternoon":"evening"}${nm?", "+nm:", sir"}.`,`${h<12?"सुप्रभात":h<17?"नमस्कार":"शुभ संध्या"}${nm?" "+nm:""}।`);
+  const date=now.toLocaleDateString(loc,{weekday:"long",day:"numeric",month:"long"});
+  const w=await wx();
+  const rem=gj("nx_rem",[]).filter(r=>r.at>Date.now()).sort((a,b)=>a.at-b.at);
+  const rt=rem.length?L(`You have ${rem.length} active reminder${rem.length>1?"s":""}. Next: ${rem[0].task||"timer"} at ${hm(rem[0].at,loc)}.`,`आपके ${rem.length} रिमाइंडर सक्रिय हैं। अगला: ${rem[0].task||"टाइमर"}, ${hm(rem[0].at,loc)} बजे।`):L("No active reminders.","कोई रिमाइंडर नहीं है।");
+  const notes=gj("nx_notes",[]).slice(-3).map(n=>n.t);
+  const nt=notes.length?L("Recent notes: ","हाल के नोट्स: ")+notes.join("; ")+".":"";
+  const text=[greet,L(`It is ${hm(now,loc)} on ${date}.`,`अभी ${hm(now,loc)} हुए हैं, आज ${date} है।`),w,rt,nt].filter(Boolean).join("\n");
+  addMessage(text,"bot");lastAIText=text.replace(/\n/g," ");speak(lastAIText);setStatus("SYSTEM READY");
+}
+const BR=/^(good morning|morning|suprabhat|सुप्रभात|गुड मॉर्निंग)( jarvis)?$|\b(morning|daily) (briefing|update|report)\b|^briefing$|^brief me\b/i;
+const prev=window.askJarvis;
+window.askJarvis=async m=>{if(BR.test(String(m).trim())){await brief();return}return prev(m)};
+
+/* install chip */
+let dp=null;
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e});
+const ch=document.querySelector(".chips"),mk=(t,f)=>{const b=document.createElement("button");b.className="chip";b.textContent=t;b.onclick=f;ch&&ch.appendChild(b);return b};
+mk("BRIEFING",()=>{addMessage("Morning briefing","user");askJarvis("morning briefing")});
+if(!matchMedia("(display-mode: standalone)").matches&&!navigator.standalone)mk("INSTALL APP",()=>{
+  if(dp){dp.prompt();dp=null}
+  else addMessage(/iphone|ipad/i.test(navigator.userAgent)?"iPhone: Safari me Share button dabao, phir 'Add to Home Screen' chuno.":"Android: Chrome me upar ⋮ menu kholo, phir 'Install app' ya 'Add to Home screen' chuno.","bot");
+});
 })();
 </script>
 
