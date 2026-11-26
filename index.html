@@ -1064,7 +1064,7 @@ $("micBtn").onclick=()=>{if(wakeOn){setWake(false);setTimeout(oldMic,400)}else o
 const chips=document.createElement("div");chips.className="chips";
 ["Help","What time is it","Weather","Set timer 5 minutes","Show notes","Status"].forEach(c=>{const b=document.createElement("button");b.className="chip";b.textContent=c.toUpperCase();b.onclick=()=>run(c);chips.appendChild(b)});
 document.querySelector(".controls").after(chips);
-const gc=document.createElement("button");gc.className="chip";gc.textContent="CONNECT GOOGLE";gc.onclick=()=>window.open(AI_ENDPOINT.replace(/\/?$/,"/")+"auth/google?memoryId="+encodeURIComponent(memoryId),"_blank");chips.appendChild(gc);
+const gc=document.createElement("button");gc.className="chip";gc.textContent="CONNECT GOOGLE";gc.onclick=()=>window.jvGoogle();chips.appendChild(gc);
 })();
 </script>
 
@@ -1376,7 +1376,7 @@ const tools=mkp(`<h2 class="jv-h">APPS</h2><p class="jv-s">QUICK LAUNCH</p><div 
 <p class="jv-s">ASK JARVIS</p><div class="jv-grid">${CMDS.map((c,i)=>`<button class="jv-tile" data-c="${i}">${c[0].toUpperCase()}</button>`).join("")}</div>`);
 const mem=mkp("");
 const set=mkp(`<h2 class="jv-h">SETTINGS</h2><p class="jv-s">VOICE · SESSION · DATA</p><div class="jv-card"><div class="jv-row">
-<button class="chip" data-s="VOICE">CHANGE VOICE</button><button class="chip" data-s="SPEED">VOICE SPEED</button><button class="chip" data-s="INSTALL APP">INSTALL APP</button><button class="chip" data-x="clear">CLEAR CHAT</button><button class="chip" data-x="facts">FORGET FACTS</button><button class="chip" data-x="logout">LOGOUT</button><button class="chip" data-x="reload">RELOAD APP</button></div>
+<button class="chip" data-s="VOICE">CHANGE VOICE</button><button class="chip" data-s="SPEED">VOICE SPEED</button><button class="chip" data-s="CONNECT GOOGLE">CONNECT GOOGLE</button><button class="chip" data-s="INSTALL APP">INSTALL APP</button><button class="chip" data-x="clear">CLEAR CHAT</button><button class="chip" data-x="facts">FORGET FACTS</button><button class="chip" data-x="logout">LOGOUT</button><button class="chip" data-x="reload">RELOAD APP</button></div>
 <p class="jv-s" id="jvSetInfo"></p></div>`);
 function renderMem(){
   const f=gj("nx_facts",[]),n=gj("nx_notes",[]),r=gj("nx_rem",[]).filter(x=>x.at>Date.now());
@@ -1491,5 +1491,18 @@ window.askJarvis=async m=>{
 })();
 </script>
 
+<script>
+/* CONNECT GOOGLE: asks the worker (with login token) for a one-time Google consent link */
+window.jvGoogle=async()=>{
+  const w=window.open("","_blank");
+  try{
+    const r=await fetch(AI_ENDPOINT.replace(/\/?$/,"/")+"auth/link",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+(localStorage.getItem("nx_token")||"")},body:"{}"});
+    const d=await r.json().catch(()=>({}));
+    if(r.status===401){if(w)w.close();jvLogout(true);return}
+    if(!d.url)throw new Error(d.error||"could not start");
+    if(w)w.location.href=d.url;else location.href=d.url;
+  }catch(e){if(w)w.close();addMessage("Google connect failed: "+e.message,"bot")}
+};
+</script>
 </body>
 </html>
