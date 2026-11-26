@@ -1269,5 +1269,227 @@ if(!matchMedia("(display-mode: standalone)").matches&&!navigator.standalone)mk("
 })();
 </script>
 
+<script>
+/* BETTER VOICE: picks the most natural voice, cleans text, speaks in chunks, VOICE/SPEED chips */
+(()=>{
+if(!("speechSynthesis" in window))return;
+const KEY={rate:"nx_rate",en:"nx_voice_en",hi:"nx_voice_hi"};
+const ls=(k,d)=>{try{return localStorage.getItem(k)||d}catch{return d}},lsw=(k,v)=>{try{localStorage.setItem(k,v)}catch{}};
+let voices=[];
+const load=()=>{voices=speechSynthesis.getVoices()||[]};load();
+if(speechSynthesis.addEventListener)speechSynthesis.addEventListener("voiceschanged",load);
+const lang=()=>$("lang").value||"en-US",lk=()=>lang().startsWith("hi")?"hi":"en";
+const norm=v=>v.lang.toLowerCase().replace("_","-");
+function cands(){
+  const l=lk(),loc=lang().toLowerCase();
+  return voices.filter(v=>norm(v).startsWith(l)).map(v=>{
+    let s=0;const n=v.name;
+    if(/natural|neural|online|premium|enhanced/i.test(n))s+=50;
+    if(/google/i.test(n))s+=30;
+    if(norm(v)===loc)s+=15;
+    if(l==="en"&&/daniel|ryan|george|guy|james|arthur|oliver|male/i.test(n))s+=25;
+    if(l==="en"&&norm(v)==="en-gb")s+=25;
+    if(l==="hi"&&/madhur|hemant|male/i.test(n))s+=10;
+    if(/compact|espeak/i.test(n))s-=40;
+    return{v,s};
+  }).sort((a,b)=>b.s-a.s).map(x=>x.v);
+}
+const pick=()=>{const c=cands(),sv=ls(KEY[lk()]);return c.find(v=>v.name===sv)||c[0]||null};
+const clean=t=>String(t)
+  .replace(/https?:\/\/\S+/g," link ").replace(/[*_#`~>|]/g," ")
+  .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu," ")
+  .replace(/°C/g,lk()==="hi"?" डिग्री":" degrees Celsius").replace(/%/g,lk()==="hi"?" प्रतिशत":" percent")
+  .replace(/[→•·]/g,", ").replace(/\s*\n+\s*/g,". ").replace(/\.\s*\./g,".").replace(/\s+/g," ").trim();
+const chunks=t=>{const out=[];let cur="";for(const s of t.split(/(?<=[.!?।])\s+/)){if(cur&&(cur+" "+s).length>170){out.push(cur);cur=s}else cur=cur?cur+" "+s:s}if(cur)out.push(cur);return out};
+window.speak=function(text){
+  if(!text){return}
+  speechSynthesis.cancel();
+  const parts=chunks(clean(text));if(!parts.length)return;
+  const v=pick(),rate=parseFloat(ls(KEY.rate,".93"))||1;
+  parts.forEach((p,i)=>{
+    const u=new SpeechSynthesisUtterance(p);
+    u.lang=v?v.lang:lang();if(v)u.voice=v;u.rate=rate;u.pitch=1;u.volume=1;
+    if(i===0)u.onstart=()=>{setStatus("JARVIS SPEAKING...");$("voiceMetric").textContent=$("liveVoice").textContent="ACTIVE"};
+    if(i===parts.length-1)u.onend=()=>{setStatus("SYSTEM READY");$("voiceMetric").textContent=$("liveVoice").textContent="READY"};
+    u.onerror=e=>{if(e.error!=="canceled"&&e.error!=="interrupted")setStatus("VOICE ERROR")};
+    speechSynthesis.speak(u);
+  });
+};
+const ch=document.querySelector(".chips"),mk=(t,f)=>{const b=document.createElement("button");b.className="chip";b.textContent=t;b.onclick=f;if(ch)ch.appendChild(b)};
+const sample=()=>speak(lk()==="hi"?"नमस्ते, मैं जार्विस हूँ। बताइए, क्या करना है?":"Hello, I am Jarvis. How may I assist you?");
+mk("VOICE",()=>{
+  load();const c=cands();
+  if(!c.length){addMessage("Is device par is language ki koi voice nahi mili. Phone Settings → Text-to-speech me voice data download karo.","bot");return}
+  const i=(c.indexOf(pick())+1)%c.length;lsw(KEY[lk()],c[i].name);
+  addMessage(`Voice ${i+1}/${c.length}: ${c[i].name}`,"bot");sample();
+});
+mk("SPEED",()=>{
+  const r=[.85,.93,1.1,1.25],cur=parseFloat(ls(KEY.rate,".93"))||1,n=r[(r.indexOf(cur)+1)%r.length]||1;
+  lsw(KEY.rate,String(n));addMessage("Speed: "+n+"x","bot");sample();
+});
+})();
+</script>
+
+<style>
+body{padding-bottom:58px}
+#jvNav{position:fixed;left:0;right:0;bottom:0;height:58px;z-index:9001;display:flex;background:rgba(2,10,20,.94);border-top:1px solid rgba(0,239,255,.35);backdrop-filter:blur(6px)}
+#jvNav button{flex:1;background:none;border:0;color:#6fb8cc;font:10px monospace;letter-spacing:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer}
+#jvNav button b{font-size:18px;font-weight:400}
+#jvNav button.on{color:#00efff;text-shadow:0 0 10px #00efff;box-shadow:inset 0 2px 0 #00efff}
+#jvPage{position:fixed;inset:0 0 58px 0;z-index:9000;overflow:auto;padding:18px;background:radial-gradient(circle at 50% 15%,#06223a,#02060d 75%);color:#cfefff}
+#jvPage[hidden]{display:none}
+.jv-h{margin:0 0 4px;font:700 20px monospace;letter-spacing:6px;color:#00efff;text-shadow:0 0 12px rgba(0,239,255,.6)}
+.jv-s{margin:0 0 14px;font:11px monospace;letter-spacing:2px;color:#6fb8cc}
+.jv-card{border:1px solid rgba(0,239,255,.3);background:rgba(3,14,26,.7);padding:14px;border-radius:4px 14px 4px 14px;margin-bottom:14px}
+.jv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:18px}
+.jv-tile{padding:18px 8px;text-align:center;border:1px solid rgba(0,239,255,.3);background:rgba(0,60,100,.25);color:#dff;font:12px monospace;letter-spacing:2px;border-radius:4px 14px 4px 14px;cursor:pointer;text-decoration:none;display:block}
+.jv-tile:hover{border-color:#00efff;box-shadow:0 0 18px rgba(0,239,255,.35)}
+#jvHoloWrap{position:relative;height:min(62vh,560px);border:1px solid rgba(0,239,255,.35);border-radius:4px 18px 4px 18px;overflow:hidden;background:#010509;cursor:grab;touch-action:none}
+#jvHoloWrap canvas{width:100%;height:100%;display:block}
+.jv-row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.jv-row .chip.on{color:#00efff;border-color:#00efff;background:rgba(0,239,255,.12)}
+.jv-li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,239,255,.15);font:13px monospace}
+.jv-li button{background:none;border:1px solid rgba(255,90,90,.5);color:#ff8a8a;border-radius:3px;font:10px monospace;padding:2px 8px;cursor:pointer}
+.jv-in{width:100%;box-sizing:border-box;padding:10px;background:rgba(0,40,70,.45);border:1px solid rgba(0,239,255,.3);color:#eaffff;font:14px monospace;border-radius:3px 10px 3px 10px}
+</style>
+<nav id="jvNav"><button data-p="home" class="on"><b>⌂</b>HOME</button><button data-p="holo"><b>◈</b>HOLOGRAM</button><button data-p="tools"><b>▦</b>APPS</button><button data-p="mem"><b>▤</b>MEMORY</button><button data-p="set"><b>⚙</b>SETTINGS</button></nav>
+<div id="jvPage" hidden></div>
+<script>
+/* MULTI-PAGE SHELL + HOLOGRAM STUDIO */
+(()=>{
+const pg=document.getElementById("jvPage"),nav=document.getElementById("jvNav"),TAU=Math.PI*2;
+const gj=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch{return d}},sj=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const mkp=h=>{const d=document.createElement("div");d.style.display="none";d.innerHTML=h;pg.appendChild(d);return d};
+const chip=t=>[...document.querySelectorAll(".chip")].find(b=>b.textContent===t);
+const say=cmd=>{show("home");addMessage(cmd,"user");askJarvis(cmd)};
+
+/* ---------- pages ---------- */
+const holo=mkp(`<h2 class="jv-h">HOLOGRAM STUDIO</h2><p class="jv-s">UPLOAD · DROP · PASTE ANY IMAGE → LIVE HOLOGRAM</p>
+<div id="jvHoloWrap"><canvas></canvas></div>
+<div class="jv-row"><button class="chip" data-a="up">UPLOAD IMAGE</button><button class="chip" data-a="cam">CAMERA</button><button class="chip on" data-m="points">POINTS</button><button class="chip" data-m="lines">LINES</button><button class="chip on" data-t="cyan">CYAN</button><button class="chip" data-t="gold">GOLD</button><button class="chip" data-t="orig">ORIGINAL</button><button class="chip on" data-a="bg">BG REMOVE</button><button class="chip on" data-a="auto">AUTO ROTATE</button><button class="chip" data-a="save">SAVE PNG</button></div>
+<p class="jv-s" id="jvHoloInfo">Drag on the hologram to rotate it.</p>
+<input type="file" accept="image/*" hidden id="jvF1"><input type="file" accept="image/*" capture="environment" hidden id="jvF2">`);
+const SITES=[["YouTube","https://www.youtube.com"],["Google","https://www.google.com"],["Gmail","https://mail.google.com"],["WhatsApp","https://web.whatsapp.com"],["Maps","https://maps.google.com"],["Instagram","https://www.instagram.com"],["GitHub","https://github.com"],["ChatGPT","https://chatgpt.com"],["Spotify","https://open.spotify.com"],["Amazon","https://www.amazon.in"],["Calendar","https://calendar.google.com"],["News","https://news.google.com"]];
+const CMDS=[["Briefing","morning briefing"],["Weather","weather"],["Time","what time is it"],["Help","help"]];
+const tools=mkp(`<h2 class="jv-h">APPS</h2><p class="jv-s">QUICK LAUNCH</p><div class="jv-grid">${SITES.map(s=>`<a class="jv-tile" target="_blank" rel="noopener" href="${s[1]}">${s[0].toUpperCase()}</a>`).join("")}</div>
+<p class="jv-s">ASK JARVIS</p><div class="jv-grid">${CMDS.map((c,i)=>`<button class="jv-tile" data-c="${i}">${c[0].toUpperCase()}</button>`).join("")}</div>`);
+const mem=mkp("");
+const set=mkp(`<h2 class="jv-h">SETTINGS</h2><p class="jv-s">VOICE · SESSION · DATA</p><div class="jv-card"><div class="jv-row">
+<button class="chip" data-s="VOICE">CHANGE VOICE</button><button class="chip" data-s="SPEED">VOICE SPEED</button><button class="chip" data-s="INSTALL APP">INSTALL APP</button><button class="chip" data-x="clear">CLEAR CHAT</button><button class="chip" data-x="facts">FORGET FACTS</button><button class="chip" data-x="logout">LOGOUT</button><button class="chip" data-x="reload">RELOAD APP</button></div>
+<p class="jv-s" id="jvSetInfo"></p></div>`);
+function renderMem(){
+  const f=gj("nx_facts",[]),n=gj("nx_notes",[]),r=gj("nx_rem",[]).filter(x=>x.at>Date.now());
+  const L=(a,k)=>a.length?a.map((v,i)=>`<div class="jv-li"><span>${esc(k==="nx_notes"?v.t:v)}</span><button data-k="${k}" data-i="${i}">DELETE</button></div>`).join(""):`<p class="jv-s">Nothing saved yet.</p>`;
+  mem.innerHTML=`<h2 class="jv-h">MEMORY</h2><p class="jv-s">WHAT JARVIS REMEMBERS (STORED ON THIS DEVICE)</p>
+<div class="jv-card"><p class="jv-s">FACTS ABOUT YOU</p>${L(f,"nx_facts")}</div>
+<div class="jv-card"><p class="jv-s">NOTES</p>${L(n,"nx_notes")}<div class="jv-row"><input class="jv-in" id="jvNoteIn" placeholder="New note…" style="flex:1"><button class="chip" data-x="addnote">ADD</button></div></div>
+<div class="jv-card"><p class="jv-s">ACTIVE REMINDERS</p>${r.length?r.map(x=>`<div class="jv-li"><span>${esc(x.task||"Timer")}</span><span>${new Date(x.at).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}</span></div>`).join(""):`<p class="jv-s">No active reminders.</p>`}</div>`;
+}
+const PAGES={holo,tools,mem,set};
+function show(p){
+  [...nav.children].forEach(b=>b.classList.toggle("on",b.dataset.p===p));
+  if(p==="home"){pg.hidden=true;return}
+  pg.hidden=false;for(const k in PAGES)PAGES[k].style.display=k===p?"block":"none";pg.scrollTop=0;
+  if(p==="mem")renderMem();
+  if(p==="set")document.getElementById("jvSetInfo").textContent="Session valid until "+(+localStorage.getItem("nx_exp")?new Date(+localStorage.getItem("nx_exp")).toLocaleDateString():"n/a");
+  if(p==="holo")fit();
+}
+nav.onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.p)};
+tools.onclick=e=>{const b=e.target.closest("[data-c]");if(b)say(CMDS[b.dataset.c][1])};
+set.onclick=e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.s){const c=chip(b.dataset.s);if(c)c.click();else addMessage("Option unavailable.","bot")}
+  const a=b.dataset.x;
+  if(a==="clear")$("clearBtn").click();
+  if(a==="facts"){sj("nx_facts",[]);b.textContent="DONE"}
+  if(a==="logout")jvLogout(false);
+  if(a==="reload")location.reload();
+};
+mem.onclick=e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.k){const a=gj(b.dataset.k,[]);a.splice(+b.dataset.i,1);sj(b.dataset.k,a);renderMem()}
+  if(b.dataset.x==="addnote"){const v=document.getElementById("jvNoteIn").value.trim();if(v){const a=gj("nx_notes",[]);a.push({t:v,d:Date.now()});sj("nx_notes",a);renderMem()}}
+};
+
+/* ---------- hologram engine ---------- */
+const hc=holo.querySelector("canvas"),x=hc.getContext("2d"),wrap=document.getElementById("jvHoloWrap"),info=document.getElementById("jvHoloInfo");
+let pts=[],rows=[],iw=1,ih=1,img=null,mode="points",tint="cyan",bgRem=true,auto=true,dY=0,drag=null,dpr=1;
+const RGB={cyan:"0,230,255",gold:"255,170,50",orig:"0,230,255"};
+function fit(){dpr=Math.min(devicePixelRatio||1,2);hc.width=hc.clientWidth*dpr;hc.height=hc.clientHeight*dpr;x.setTransform(dpr,0,0,dpr,0,0)}
+addEventListener("resize",()=>{if(!pg.hidden)fit()});
+function build(){
+  if(!img)return;
+  const k=Math.min(1,140/Math.max(img.naturalWidth,img.naturalHeight)),w=Math.max(8,Math.round(img.naturalWidth*k)),h=Math.max(8,Math.round(img.naturalHeight*k));
+  const o=document.createElement("canvas");o.width=w;o.height=h;const c=o.getContext("2d",{willReadFrequently:true});c.drawImage(img,0,0,w,h);
+  const d=c.getImageData(0,0,w,h).data,at=(i,j)=>(j*w+i)*4,cn=[at(0,0),at(w-1,0),at(0,h-1),at(w-1,h-1)],bg=[0,1,2].map(q=>cn.reduce((s,a)=>s+d[a+q],0)/4);
+  const run=rem=>{pts=[];rows=[];for(let j=0;j<h;j++){const row=[];for(let i=0;i<w;i++){const a=at(i,j),r=d[a],g=d[a+1],b=d[a+2];
+    if(d[a+3]<40||(rem&&Math.hypot(r-bg[0],g-bg[1],b-bg[2])<46))continue;
+    const l=(.299*r+.587*g+.114*b)/255,p={x:i-w/2,y:j-h/2,z:(l-.5)*34,ny:j/h,l,c:`rgb(${r},${g},${b})`,cy:`rgb(0,${150+l*105|0},255)`,cg:`rgb(255,${130+l*100|0},40)`};
+    pts.push(p);row.push(p)}rows.push(row)}};
+  iw=w;ih=h;run(bgRem);if(bgRem&&pts.length<w*h*.04)run(false);
+  info.textContent=`${pts.length.toLocaleString()} hologram points generated. Drag to rotate.`;
+}
+function load(f){
+  if(!f||!/^image\//.test(f.type))return;
+  const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{img=im;URL.revokeObjectURL(u);build()};im.src=u;
+}
+const F1=document.getElementById("jvF1"),F2=document.getElementById("jvF2");
+F1.onchange=()=>load(F1.files[0]);F2.onchange=()=>load(F2.files[0]);
+holo.onclick=e=>{
+  const b=e.target.closest("button");if(!b)return;const d=b.dataset;
+  const grp=(attr)=>holo.querySelectorAll(`[data-${attr}]`).forEach(z=>z.classList.toggle("on",z===b));
+  if(d.m){mode=d.m;grp("m")}
+  if(d.t){tint=d.t;grp("t")}
+  if(d.a==="up")F1.click();
+  if(d.a==="cam")F2.click();
+  if(d.a==="bg"){bgRem=!bgRem;b.classList.toggle("on",bgRem);build()}
+  if(d.a==="auto"){auto=!auto;b.classList.toggle("on",auto)}
+  if(d.a==="save")hc.toBlob(bl=>{const a=document.createElement("a");a.href=URL.createObjectURL(bl);a.download="jarvis-hologram.png";a.click()});
+};
+wrap.onpointerdown=e=>{drag={x:e.clientX,y:dY};auto=false;holo.querySelector('[data-a="auto"]').classList.remove("on");wrap.setPointerCapture(e.pointerId)};
+wrap.onpointermove=e=>{if(drag)dY=drag.y+(e.clientX-drag.x)*.01};
+wrap.onpointerup=()=>{drag=null};
+addEventListener("dragover",e=>e.preventDefault());
+addEventListener("drop",e=>{const f=e.dataTransfer&&e.dataTransfer.files[0];if(f&&/^image\//.test(f.type)){e.preventDefault();show("holo");load(f)}});
+addEventListener("paste",e=>{const it=[...((e.clipboardData&&e.clipboardData.items)||[])].find(i=>i.type.startsWith("image/"));if(it){show("holo");load(it.getAsFile())}});
+
+function draw(ms){
+  requestAnimationFrame(draw);
+  if(pg.hidden||holo.style.display==="none"||document.hidden)return;
+  const W=hc.clientWidth,H=hc.clientHeight;if(!W||hc.width!==Math.round(W*dpr))fit();
+  const t=ms/1000,cx=W/2,cy=H*.46,by=H*.88,rgb=RGB[tint];
+  x.globalCompositeOperation="source-over";x.globalAlpha=1;
+  const g=x.createRadialGradient(cx,H*.5,10,cx,H*.5,H*.85);g.addColorStop(0,"#031a2b");g.addColorStop(1,"#010509");x.fillStyle=g;x.fillRect(0,0,W,H);
+  x.globalCompositeOperation="lighter";
+  const bm=x.createLinearGradient(0,by,0,cy-H*.38);bm.addColorStop(0,`rgba(${rgb},.22)`);bm.addColorStop(1,`rgba(${rgb},0)`);
+  x.fillStyle=bm;x.beginPath();x.moveTo(cx-W*.14,by);x.lineTo(cx+W*.14,by);x.lineTo(cx+W*.3,cy-H*.38);x.lineTo(cx-W*.3,cy-H*.38);x.fill();
+  for(let k=0;k<3;k++){x.strokeStyle=`rgba(${rgb},${.8-k*.22})`;x.lineWidth=2;x.beginPath();x.ellipse(cx,by,W*(.14+k*.035),H*(.03+k*.008),0,0,TAU);x.stroke()}
+  if(pts.length){
+    const s=Math.min(W,H)*.66/Math.max(iw,ih),yaw=(auto?Math.sin(t*.6)*.7:0)+dY,cs=Math.cos(yaw),sn=Math.sin(yaw),sy=(t*.3)%1.2-.1,fl=.88+.12*Math.random();
+    const gl=Math.random()<.025?{y:Math.random(),o:(Math.random()-.5)*16}:null,sz=Math.max(1.2,s*.9);
+    const P=p=>{const X=p.x*s,Z=p.z*s,rx=X*cs+Z*sn,rz=-X*sn+Z*cs,f=1/(1+rz/(W*.9));return[cx+rx*f+(gl&&Math.abs(p.ny-gl.y)<.05?gl.o:0),cy+p.y*s*f,f]};
+    if(mode==="points"){
+      for(const p of pts){const q=P(p),sc=Math.abs(p.ny-sy)<.025;x.globalAlpha=(sc?1:.3+.6*p.l)*fl;x.fillStyle=sc?"#fff":tint==="orig"?p.c:tint==="gold"?p.cg:p.cy;x.fillRect(q[0],q[1],sz*q[2],sz*q[2])}
+    }else{
+      x.lineWidth=1;x.strokeStyle=tint==="orig"?"rgb(160,230,255)":`rgb(${rgb})`;x.globalAlpha=.6*fl;
+      for(let j=0;j<rows.length;j+=2){const r=rows[j];if(r.length<2)continue;x.beginPath();let prev=null;for(const p of r){const q=P(p);(prev&&p.x-prev.x===1)?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]);prev=p}x.stroke()}
+    }
+  }else{
+    x.globalAlpha=.8;x.fillStyle=`rgb(${rgb})`;x.font="13px monospace";x.textAlign="center";x.fillText("UPLOAD · DROP · PASTE AN IMAGE",cx,cy);
+  }
+  x.globalCompositeOperation="source-over";x.globalAlpha=1;x.fillStyle="rgba(0,0,0,.18)";for(let y=0;y<H;y+=3)x.fillRect(0,y,W,1);
+}
+requestAnimationFrame(draw);
+
+/* voice / text command: "hologram" opens the studio */
+const prev=window.askJarvis;
+window.askJarvis=async m=>{
+  if(/hologram|होलोग्राम/i.test(String(m))){show("holo");const t="Hologram studio is ready, sir. Upload, drop or paste an image.";addMessage(t,"bot");speak(t);return}
+  return prev(m);
+};
+})();
+</script>
+
 </body>
 </html>
