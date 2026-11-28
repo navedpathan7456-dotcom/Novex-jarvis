@@ -1504,5 +1504,128 @@ window.jvGoogle=async()=>{
   }catch(e){if(w)w.close();addMessage("Google connect failed: "+e.message,"bot")}
 };
 </script>
+<script>
+/* PHONE CONTROL: web-level device features + automation bridge (MacroDroid/Tasker webhook) */
+(()=>{
+const lsg=k=>{try{return localStorage.getItem(k)||""}catch{return""}};
+const say=(t,link)=>{addMessage(t,"bot");if(link){const a=document.createElement("a");a.className="msg-link";a.href=link;a.textContent="TAP TO OPEN ↗";$("chat").lastChild.appendChild(a);$("chat").scrollTop=$("chat").scrollHeight}lastAIText=t;speak(t);setStatus("SYSTEM READY")};
+let ts=null;
+async function torch(on){
+  try{
+    if(!on){if(ts){ts.getTracks().forEach(t=>t.stop());ts=null}say("Flashlight off.");return}
+    ts=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
+    await ts.getVideoTracks()[0].applyConstraints({advanced:[{torch:true}]});say("Flashlight on, sir.");
+  }catch{if(ts){ts.getTracks().forEach(t=>t.stop());ts=null}say("This phone or browser does not allow flashlight control from a web app. Set up PHONE LINK in Settings instead.")}
+}
+async function hook(id){
+  const base=lsg("nx_hook");
+  if(!base){say("Phone link is not set up. Open SETTINGS, then PHONE LINK, and paste your MacroDroid webhook URL.");return}
+  try{await fetch(base.replace(/\/?$/,"/")+id,{mode:"no-cors"});say("Command sent: "+id.replace(/_/g," ")+". Your phone automation will carry it out.")}
+  catch{say("I could not reach the phone automation service.")}
+}
+const ACT=[
+ [/wi-?fi.*\b(off|band|stop)\b|\b(off|band)\b.*wi-?fi/,"wifi_off"],[/wi-?fi.*\b(on|chalu|start)\b|\b(on|chalu)\b.*wi-?fi/,"wifi_on"],
+ [/bluetooth.*\b(off|band)\b|\b(off|band)\b.*bluetooth/,"bt_off"],[/bluetooth.*\b(on|chalu)\b|\b(on|chalu)\b.*bluetooth/,"bt_on"],
+ [/(volume|awaaz|awaz).*(up|badha|increase|zyada)/,"vol_up"],[/(volume|awaaz|awaz).*(down|kam|decrease|ghata)/,"vol_down"],[/\bmute\b|silent mode/,"mute"],
+ [/brightness.*(up|badha|increase|zyada)/,"bright_up"],[/brightness.*(down|kam|decrease)/,"bright_down"],
+ [/(do not disturb|dnd).*(off|band)/,"dnd_off"],[/(do not disturb|dnd).*(on|chalu)/,"dnd_on"],
+ [/lock (the )?(phone|screen)|phone lock/,"lock"],[/screenshot/,"screenshot"]
+];
+const APP={whatsapp:"whatsapp://send",instagram:"instagram://app",youtube:"vnd.youtube://",spotify:"spotify:",telegram:"tg://",snapchat:"snapchat://",maps:"geo:0,0?q="};
+const prev=window.askJarvis;
+window.askJarvis=async m=>{
+  const raw=String(m).trim(),t=raw.toLowerCase();let r;
+  if(/flash ?light|torch|टॉर्च/.test(t)){await torch(!/\b(off|band|bujha)\b/.test(t));return}
+  if(/\bvibrat/.test(t)){if(navigator.vibrate){navigator.vibrate([300,100,300]);say("Vibrating.")}else say("Vibration is not supported here.");return}
+  if(/^share (that|this|it|reply)/.test(t)){if(navigator.share)navigator.share({text:lastAIText}).catch(()=>{});else say("Sharing is not supported here.");return}
+  if(/(open|start) (the )?camera|selfie|photo (kheench|lo)/.test(t)){document.querySelector('#jvNav [data-p="holo"]').click();setTimeout(()=>document.getElementById("jvF2").click(),80);say("Opening the camera. Your photo will turn into a hologram.");return}
+  if(r=raw.match(/^(?:sms|text|message)\s+(\+?\d[\d\s-]{7,14})\s+(.+)$/i)){let n=r[1].replace(/[^\d+]/g,"");if(/^\d{10}$/.test(n))n="+91"+n;const u=`sms:${n}?body=${encodeURIComponent(r[2])}`;say("Message ready. Tap to open it and press send.",u);return}
+  if(/\bapp\b/.test(t)&&/\b(open|kholo|khol|launch|start)\b/.test(t)){const k=Object.keys(APP).find(k=>t.includes(k));if(k){say("Opening the "+k+" app.",APP[k]);try{location.href=APP[k]}catch{}return}}
+  for(const [re,id] of ACT)if(re.test(t)){await hook(id);return}
+  if(r=t.match(/^phone (\w+)$/)){await hook(r[1]);return}
+  return prev(m);
+};
+/* settings card */
+const h=[...document.querySelectorAll("#jvPage h2")].find(x=>x.textContent==="SETTINGS");
+if(h){
+  h.parentElement.insertAdjacentHTML("beforeend",`<div class="jv-card"><p class="jv-s">PHONE LINK: MacroDroid webhook base URL</p><input class="jv-in" id="jvHook" placeholder="https://trigger.macrodroid.com/YOUR-DEVICE-ID"><div class="jv-row"><button class="chip" id="jvHookSave">SAVE</button><button class="chip" id="jvHookTest">TEST (id: test)</button></div></div>`);
+  const i=document.getElementById("jvHook");i.value=lsg("nx_hook");
+  document.getElementById("jvHookSave").onclick=()=>{try{localStorage.setItem("nx_hook",i.value.trim())}catch{}document.getElementById("jvHookSave").textContent="SAVED"};
+  document.getElementById("jvHookTest").onclick=()=>{try{localStorage.setItem("nx_hook",i.value.trim())}catch{}hook("test")};
+}
+})();
+</script>
+
+<script>
+/* NATIVE ANDROID BRIDGE: active only inside the NOVEX Jarvis APK */
+(()=>{
+const NP=window.NovexPhone;if(!NP||!NP.available||!NP.available())return;
+const prev=window.askJarvis;
+const say=t=>{addMessage(t,"bot");lastAIText=t;speak(t);setStatus("SYSTEM READY")};
+const M=[
+ [/\bunmute\b/i,"unmute"],
+ [/(flash ?light|torch).*\b(off|band)\b|\b(off|band)\b.*(flash ?light|torch)/i,"torch_off"],
+ [/flash ?light|torch|टॉर्च/i,"torch_on"],
+ [/volume (?:to |set to |at )?(\d{1,3})/i,"set_volume",1],
+ [/volume.*(up|badha|zyada|increase)/i,"vol_up"],[/volume.*(down|kam|ghata|decrease)/i,"vol_down"],[/\bmute\b|silent mode/i,"mute"],
+ [/brightness (?:to |set to |at )?(\d{1,3})/i,"set_brightness",1],
+ [/brightness.*(up|badha|zyada|increase)/i,"bright_up"],[/brightness.*(down|kam|decrease)/i,"bright_down"],
+ [/(do not disturb|dnd).*\b(off|band)\b/i,"dnd_off"],[/(do not disturb|dnd)/i,"dnd_on"],
+ [/^(?=.*\b(on|off|chalu|band|turn|settings)\b).*wi-?fi/i,"wifi_panel"],[/^(?=.*\b(on|off|chalu|band|turn|settings)\b).*bluetooth/i,"bt_panel"],
+ [/lock (the )?(phone|screen)|phone lock/i,"lock"],[/screenshot/i,"screenshot"],
+ [/^(go )?home( screen)?$|go home/i,"home"],[/^go back$|peeche jao/i,"back"],[/recent apps|^recents$/i,"recents"],
+ [/(open|show|kholo).*notification/i,"notifications"],[/quick settings/i,"quick_settings"],
+ [/scroll down|neeche scroll/i,"scroll_down"],[/scroll up|upar scroll/i,"scroll_up"],
+ [/^(?:tap|click|press) (?:on )?(.+)$/i,"tap_text",1],[/^type (.+)$/i,"type_text",1],
+ [/read (my |the )?screen|screen (par|pe) kya hai/i,"read_screen"],
+ [/\bbattery\b/i,"battery"],
+ [/(next|agla) (song|track|gaana)/i,"media_next"],[/(previous|pichla) (song|track|gaana)/i,"media_prev"],[/^(pause|rok do)( music| song)?$/i,"media_pause"],[/^(resume|play music|gaana chalao)$/i,"media_play"],
+ [/^call (\+?\d[\d\s-]{7,14})/i,"call",1],
+ [/^(?:sms|text) (\+?\d[\d\s-]{7,14}) (.+)/i,"sms"],
+ [/set (?:an )?alarm (?:for |at )?(\d{1,2})(?::(\d{2}))? ?(am|pm)?/i,"alarm"],
+ [/^(?:open|launch|kholo|khol) (.+?)(?: app| kholo)?$/i,"open_app",1]
+];
+window.askJarvis=async m=>{
+  const raw=String(m).trim();
+  for(const [re,act,i] of M){
+    const r=raw.match(re);if(!r)continue;
+    let arg=i?(r[i]||""):"";
+    if(act==="alarm"){let h=+r[1];const mi=+(r[2]||0);if(/pm/i.test(r[3]||"")&&h<12)h+=12;if(/am/i.test(r[3]||"")&&h===12)h=0;arg=h+":"+mi}
+    if(act==="sms")arg=r[1]+"|"+r[2];
+    if(act==="open_app"&&/^(hologram|camera|notes?|memory|settings|apps?|home|briefing)$/i.test(arg.trim()))break;
+    const out=String(NP.run(act,arg));
+    if(act==="open_app"&&/not found/i.test(out))break;
+    say(out.replace(/^(OK|ERROR): ?/,""));return;
+  }
+  return prev(m);
+};
+/* native speech recognition (WebView has none) */
+const wb=$("wakeBtn");if(wb)wb.style.display="none";
+$("micBtn").onclick=()=>{NP.listen($("lang").value);setStatus("LISTENING...")};
+window.onNativeSpeech=t=>{if(t){addMessage(t,"user");askJarvis(t)}else setStatus("SYSTEM READY")};
+/* chips */
+const ch=document.querySelector(".chips");
+if(ch){const b=document.createElement("button");b.className="chip";b.textContent=NP.accessibilityOn()?"CONTROL: ON":"ENABLE CONTROL";b.onclick=()=>NP.openAccessibilitySettings();ch.appendChild(b)}
+})();
+</script>
+
+<script>
+/* IDENTITY + CONFIDENTIALITY: fixed answers (the AI model is also told these rules on the server) */
+(()=>{
+const hi=()=>$("lang").value==="hi-IN",L=(e,h)=>hi()?h:e;
+const YOU=/(\byou\b|\byour\b|tumhe|tumhar|tujhe|tera|teri|aapko|aapka|aapki|aapke|jarvis)/i;
+const WHO=/(who|kisne|kaun|kon).*(made|created|built|banaya|develop|owner|creator|maker|malik)|(creator|maker|owner|developer|malik)/i;
+const PRIV=/(storage|database|server|api ?key|password|source code|system prompt|personal (detail|info)|private (detail|info)|kahan.*(save|store|rakh)|where.*(stored|saved|hosted))/i;
+const MINE=/(phone|mobile|device|\bmera\b|\bmeri\b|\bmere\b|\bmy\b)/i;
+const say=t=>{addMessage(t,"bot");lastAIText=t;speak(t);setStatus("SYSTEM READY")};
+const prev=window.askJarvis;
+window.askJarvis=async m=>{
+  const t=String(m);
+  if(YOU.test(t)&&WHO.test(t)&&!/(who|kaun|kon)\s+(is|hai)\s+naved/i.test(t)){say(L("I was created by Naved sir.","मुझे नवेद सर ने बनाया है।"));return}
+  if(YOU.test(t)&&PRIV.test(t)&&!MINE.test(t)){say(L("Naved sir has instructed me not to share that information.","नवेद सर ने मुझे ये जानकारी बताने से मना किया है।"));return}
+  return prev(m);
+};
+})();
+</script>
 </body>
 </html>
