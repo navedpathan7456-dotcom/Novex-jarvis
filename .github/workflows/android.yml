@@ -1,21 +1,30 @@
 name: Build Android APK
 on:
   workflow_dispatch: {}
-  push:
-    paths: ["android/**"]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Show repo files
+        run: ls -la && find . -maxdepth 3 -name "settings.gradle.kts" -not -path "./.git/*"
       - uses: actions/setup-java@v4
-        with: { distribution: temurin, java-version: 17 }
+        with:
+          distribution: temurin
+          java-version: 17
       - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v3
-        with: { gradle-version: "8.7" }
-      - run: gradle assembleDebug --no-daemon
-        working-directory: android
+        with:
+          gradle-version: "8.7"
+      - name: Build APK
+        run: |
+          f=$(find . -maxdepth 4 -name settings.gradle.kts -not -path "./.git/*" | head -n1)
+          if [ -z "$f" ]; then echo "ERROR: settings.gradle.kts not found. The android folder was not uploaded correctly."; exit 1; fi
+          d=$(dirname "$f")
+          echo "Building in $d"
+          cd "$d"
+          gradle assembleDebug --no-daemon --stacktrace
       - uses: actions/upload-artifact@v4
         with:
           name: novex-jarvis-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: "**/build/outputs/apk/debug/app-debug.apk"
