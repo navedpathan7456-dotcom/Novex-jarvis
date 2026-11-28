@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">NOVEX Jarvis</string>
+    <string name="acc_desc">Lets NOVEX Jarvis do what you ask by voice or text: press Home or Back, tap buttons, scroll, type text and read the text visible on screen. It only acts when you give it a command.</string>
+</resources>
